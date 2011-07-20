@@ -4,8 +4,8 @@ Adhocracy development buildout
 This buildout sets up an adhocracy development env and all dependencies.
 It compiles nearly all dependecies to make a repeatable and isolated enviroment.
 It sets up a bunch of servers and configures supervisor to run them:
-      main (http server that runs adhocracy with Spawning/WSGI)
-      solr (searching)
+     main (http server that runs adhocracy with Spawning/WSGI)
+     solr (searching)
      memcached (code cache)
      rabbitmq (internal messaging queue)
      adhocracy_background
@@ -47,7 +47,7 @@ Run
 
    Start all dependency server:
    $ bin/supervisord 
-
+     
    To start/stop one server:
    $ bin/supervisorctl stop adhocracy
 
@@ -55,7 +55,7 @@ Run
    $ bin/paster serve etc/development.ini
 
    Rerun paster setup-app:
-   $ bin/paster setup-app etc/development --name=content
+   $ bin/paster setup-app etc/development.ini --name=content
 
 TODO
 -------

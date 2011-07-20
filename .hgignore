@@ -1,0 +1,17 @@
+var
+parts
+bin
+lib
+eggs
+include
+downloads
+installed_eggs
+.*\.egg-info$
+.*\.pyo$
+.*\.pyc$
+.mr.developer.cfg
+.installed.cfg
+etc/development.ini
+etc/rabbitmq-env.conf
+etc/vhost_adhocracy_bundestag.conf
+etc/vhost_adhocracy_bundestag_develop.conf
