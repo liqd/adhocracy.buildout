@@ -6,9 +6,9 @@
 [DEFAULT]
 debug = false
 # Uncomment and replace with the address which should receive any error reports
-email_to = ${adhocracy:email_to}
+email_to = ${adhocracy:email.to}
 smtp_server = localhost
-error_email_from = ${adhocracy:error_email_from} 
+error_email_from = ${adhocracy:email.from} 
 
 [server:main]
 use = egg:Paste#http
@@ -117,7 +117,7 @@ set debug = false
 # INSTALL: Set up the Adhocracy domain name. This will be used to determine the
 # active instance, e.g. "Test Instance" for test.adhocracy.lan. 
 adhocracy.domain = ${domains:main} 
-adhocracy.protocol = http
+adhocracy.protocol = ${adhocracy:protocol}
 
 # INSTALL: Set a site name for all instances. This will be used as a part of 
 # the html <title>, notification E-Mails etc. 
