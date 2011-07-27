@@ -19,7 +19,7 @@ Install
 
 Install dependencies (Debian 6.0 / Ubuntu 10.04 example):
    $ sudo apt-get install libpng-dev libjpeg-dev gcc make build-essential bin86 unzip libpcre3-dev zlib1g-dev mercurial
-   $ sudo apt-get install python python-virtualenv
+   $ sudo apt-get install python python-virtualenv python-dev
    $ sudo apt-get install libsqlite3-dev postgresql-server-dev-8.4
    $ sudo apt-get install openjdk-6-jre 
    $ sudo apt-get install erlang-dev erlang-mnesia erlang-os-mon xsltproc
@@ -62,6 +62,5 @@ TODO
 
 * example buildout
 
-* Did we list all needed devolop packages?
 
 
