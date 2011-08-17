@@ -6,12 +6,13 @@ It compiles nearly all dependecies to make a repeatable and isolated
 enviroment. It is tested on linux and will probably run on OS X.
 
 It sets up a bunch of servers and configures supervisor to run them:
-     adhocracy (http server that runs adhocracy with Spawning/WSGI)
-     adhocracy_background (background queue processing)
-     solr (searching)
-     memcached (code cache)
-     rabbitmq (internal messaging queue)
-     supervisor 
+
+* adhocracy (http server that runs adhocracy with Spawning/WSGI)
+* adhocracy_background (background queue processing)
+* solr (searching)
+* memcached (code cache)
+* rabbitmq (internal messaging queue)
+* supervisor 
 
 Edit buildout_development.cfg and/or buildout_common.cfg to change the
 domain, ports and server versions. You can overwrite settings from
@@ -70,6 +71,8 @@ You should make a virtual env::
 
 Run buildout
 ------------
+
+::
 
    $ bin/python bootstrap.py -c buildout_development.cfg
    $ bin/buildout -Nc buildout_development.cfg
