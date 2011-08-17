@@ -30,7 +30,7 @@ To make the apache vhost work run:
 
 You should make a virtual env:
    $ mkdir adhocracy_buildout 
-   $ virtualenv adhocracy_buildout --setuptools --no-site-packages
+   $ virtualenv --distribute --no-site-packages adhocracy_buildout
    $ cd adhocracy_buildout 
    $ source bin/activate
 
