@@ -2,60 +2,102 @@ Adhocracy development buildout
 ==============================
  
 This buildout sets up an adhocracy development env and all dependencies.
-It compiles nearly all dependecies to make a repeatable and isolated enviroment.
+It compiles nearly all dependecies to make a repeatable and isolated 
+enviroment. It is tested on linux and will probably run on OS X.
+
 It sets up a bunch of servers and configures supervisor to run them:
-     main (http server that runs adhocracy with Spawning/WSGI)
+     adhocracy (http server that runs adhocracy with Spawning/WSGI)
+     adhocracy_background (background queue processing)
      solr (searching)
      memcached (code cache)
      rabbitmq (internal messaging queue)
-     adhocracy_background
      supervisor 
 
-Edit buildout-common to change the domain, ports and server versions. 
-You can also use system packages, just change the parts option.
+Edit buildout_development.cfg and/or buildout_common.cfg to change the
+domain, ports and server versions. You can overwrite settings from
+buildout_common.cfg in buildout_development.cfg. You can also use
+system packages, e.g. for solr or rabbitmq change the port settings in
+the buildout_*.cfg files and remove the sections form [buildout]
+"parts" and adjust the [supervisor] configurations, e.g.::
+
+    [buildout]
+    
+    extends = buildout_common.cfg
+    parts += 
+        libevent
+        supervisor
+
+    ...
+    
+    [supervisor]
+    ...
+    programs =
+        40 adhocracy_background ${buildout:directory}/bin/paster [--plugin=adhocracy background -c ${buildout:directory}/etc/development.ini]
+
+If you want to install a certain version of adhocracy, edit 
+buildout_development.cfg and change 'branch' in the [adhocracy_code] 
+section to a branch name, a revision or a tag name, e.g.::
+
+    [adhocracy_code]
+    branch = release-1.2a2
+
 
 Install 
 --------
 
-Install dependencies (Debian 6.0 / Ubuntu 10.04 example):
-   $ sudo apt-get install libpng-dev libjpeg-dev gcc make build-essential bin86 unzip libpcre3-dev zlib1g-dev mercurial
+Install dependencies (Debian 6.0 / Ubuntu 10.04 example)::
+
+   $ sudo apt-get install libpng-dev libjpeg-dev gcc
+   $ sudo apt-get install make build-essential bin86 unzip 
+   $ sudo apt-get install libpcre3-dev zlib1g-dev mercurial
    $ sudo apt-get install python python-virtualenv python-dev
    $ sudo apt-get install libsqlite3-dev postgresql-server-dev-8.4
    $ sudo apt-get install openjdk-6-jre 
    $ sudo apt-get install erlang-dev erlang-mnesia erlang-os-mon xsltproc
-To make the apache vhost work run:
+
+To make the apache vhost work run::
+
    $ sudo apt-get install libapache2-mod-proxy-html
    $ sudo a2enmod proxy proxy_http proxy_html
 
+You should make a virtual env::
 
-You should make a virtual env:
    $ mkdir adhocracy_buildout 
    $ virtualenv --distribute --no-site-packages adhocracy_buildout
    $ cd adhocracy_buildout 
    $ source bin/activate
 
-Configure
-   Change settings in buildout_common.cfg and buildout_development.cfg (ports, domain, branch,..)
 
-Run buildout:
-   $ python bootstrap.py -c buildout-development.cfg
-   $ bin/buildout -N
+Run buildout
+------------
+
+   $ bin/python bootstrap.py -c buildout_development.cfg
+   $ bin/buildout -Nc buildout_development.cfg
 
 
 Run
------
+---
 
-   Start all dependency server:
+::
+
+   # (Re)Run paster setup-app to set up or update the database
+   # structure.
+   $ bin/paster setup-app etc/development.ini --name=content
+
+
+   # Start all dependency servers:
    $ bin/supervisord 
      
-   To start/stop one server:
-   $ bin/supervisorctl stop adhocracy
+   # View the status of all servers
+   $ bin/supervisorctl status
 
-   Start the adhocracy wsgi server without supervisor:
+   # To start/stop one server use
+   # $ bin/supervisorctl stop <name>
+
+   Start the adhocracy server in foreground mode:
    $ bin/paster serve etc/development.ini
 
-   Rerun paster setup-app:
-   $ bin/paster setup-app etc/development.ini --name=content
+
 
 TODO
 -------
