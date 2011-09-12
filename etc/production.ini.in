@@ -159,6 +159,10 @@ adhocracy.amqp.event_exchange = adhocracy.exchange
 #adhocracy.amqp.userid = 
 #adhocracy.amqp.password =
 
+# INSTALL: If you want to use recaptcha uncomment these lines 
+#recaptcha.public_key = 6LcICcgSAAAAAKNYq9iM4lIpB_GSjYItF21wS4NS
+#recaptcha.private_key = 6LcICcgSAAAAAEJL1zhVbX6N0TGb0zVXD_g2lXSo
+
 # TUNING: Memcache page fragments? 
 adhocracy.cache_tiles = True
 
