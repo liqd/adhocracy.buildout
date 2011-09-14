@@ -113,7 +113,7 @@ adhocracy.solr.url = http://${domains:main}:${ports:solr}/solr
 
 # INSTALL: Set up the Adhocracy domain name. This will be used to determine the
 # active instance, e.g. "Test Instance" for test.adhocracy.lan. 
-adhocracy.domain = ${domains:main} 
+adhocracy.domain = ${domains:main}${domains:main.force_port}
 adhocracy.protocol = ${adhocracy:protocol}
 
 # INSTALL: Set a site name for all instances. This will be used as a part of 
