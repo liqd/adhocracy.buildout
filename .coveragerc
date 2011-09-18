@@ -1,0 +1,6 @@
+[run]
+include =
+    src/adhocracy/*
+omit =
+    src/adhocracy/*.egg/*
+    src/adhocracy/adhocracy/tests/*
