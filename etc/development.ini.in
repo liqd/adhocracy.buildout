@@ -129,6 +129,9 @@ adhocracy.site.dir = ${buildout:directory}/var/site
 # INSTALL: A nice E-Mail address. 
 adhocracy.email.from = ${adhocracy:email.from}
 
+# Show fallback icons in instance overview if no instance icon is defined
+adhocracy.show_instance_fallback_icons = True
+
 # INSTALL: Twitter. Since there is currently no option to take it out of the UI, 
 # you will want to use Twitter. Create an OAuth application to allow users to 
 # link their profiles: https://twitter.com/oauth_clients
