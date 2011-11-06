@@ -1,0 +1,13 @@
+{% include etc/development.ini.in %}
+
+#OVERRIDES to disable theming
+
+[app:content]
+adhocracy.domain = ${parts.domains.main}${parts.domains['main_unthemed.force_port']}
+
+[server:main]
+port = ${parts.ports.main_unthemed}
+
+[pipeline:default]
+pipeline = content    
+
