@@ -1,10 +1,11 @@
 #
-# WARNING: Please make you changes here and then run buildout to install the adhocracy config file:
-#     $ bin/buildout -Nc buildout-development.cfg install adhocracy_conf
-# The generated config file is here: parts/development.ini
+# WARNING: Please make you changes in *.ini.in file and then run buildout to install it.
 #
+
 [DEFAULT]
-debug = true
+{% if parts.adhocracy.debug == 'True' %}debug = True  {% end %}
+{% if parts.adhocracy.debug != 'True' %}debug = False {% end %}
+
 # Uncomment and replace with the address which should receive any error reports
 email_to = ${parts.adhocracy['email.to']}
 smtp_server = localhost
@@ -14,6 +15,9 @@ error_email_from = ${parts.adhocracy['email.from']}
 use = egg:Paste#http
 host = 127.0.0.1
 port = ${parts.ports.main}
+{% if parts.adhocracy.debug == 'True' %}use_threadpool = True  {% end %}
+{% if parts.adhocracy.debug != 'True' %}use_threadpool = False {% end %}
+threadpool_workers = 20
 
 [composite:main]
 use = egg:Paste#urlmap
@@ -49,7 +53,8 @@ use = egg:diazo
 read_network = True
 rules = ${parts.adhocracy_conf.rules} 
 prefix = /static_theme
-debug = true
+{% if parts.adhocracy.debug == 'True' %}debug = true  {% end %}
+{% if parts.adhocracy.debug != 'True' %}debug = false {% end %}
 wordpress_backend = ${parts.domains.blog} 
 wordpress_backend_startseite = ${parts.domains.blog}/startseite/
 
@@ -110,6 +115,7 @@ adhocracy.solr.url = http://${parts.domains.main}:${parts.ports.solr}/solr
 # Debug mode will enable the interactive debugging tool, allowing ANYONE to
 # execute malicious code after an exception is raised.
 #set debug = false
+{% if parts.adhocracy.debug != 'True' %}set debug = false {% end %}
 
 # INSTALL: Set up the Adhocracy domain name. This will be used to determine the
 # active instance, e.g. "Test Instance" for test.adhocracy.lan. 
@@ -170,9 +176,8 @@ adhocracy.cache_tiles = True
 # adhocracy.instance = adhocracy
 
 # Statistics via Piwik
-piwik.site = http://stats.liqd.net/
-piwik.id = 1
-
+piwik.site = 
+piwik.id = 
 
 # Logging configuration
 [loggers]
@@ -195,7 +200,8 @@ qualname = routes.middleware
 # "level = DEBUG" logs the route matched and routing variables.
 
 [logger_adhocracy]
-level = DEBUG
+{% if parts.adhocracy.debug == 'True' %}level = Debug  {% end %}
+{% if parts.adhocracy.debug != 'True' %}level = INFO {% end %}
 handlers =
 qualname = adhocracy
 
