@@ -15,8 +15,8 @@ error_email_from = ${parts.adhocracy['email.from']}
 use = egg:Paste#http
 host = 127.0.0.1
 port = ${parts.ports.main}
-{% if parts.adhocracy.debug == 'True' %}use_threadpool = True  {% end %}
-{% if parts.adhocracy.debug != 'True' %}use_threadpool = False {% end %}
+{% if parts.adhocracy.debug == 'True' %}use_threadpool = False  {% end %}
+{% if parts.adhocracy.debug != 'True' %}use_threadpool = True {% end %}
 threadpool_workers = 20
 
 [composite:main]
@@ -30,7 +30,7 @@ use = egg:Paste#urlmap
 # Serve the theme from disk from /static (as set up in [composite:main])
 [app:static]
 use = egg:Paste#static
-document_root = ${parts.buildout.directory}/src/adhocracy.enquete_theme/adhocracy/enquete_theme
+document_root =  ${parts.adhocracy_code.diazo_theme_rules_dir}
 
 # Serve the Diazo-transformed content everywhere else
 [pipeline:default]
@@ -51,7 +51,8 @@ pipeline = theme
 [filter:theme]
 use = egg:diazo
 read_network = True
-rules = ${parts.adhocracy_conf.rules} 
+rules = ${parts.adhocracy_code.diazo_theme_rules_dir}/rules.xml
+wordpress_rules_dir = ${parts.adhocracy_code.diazo_wordpress_rules_dir}
 prefix = /static_theme
 {% if parts.adhocracy.debug == 'True' %}debug = true  {% end %}
 {% if parts.adhocracy.debug != 'True' %}debug = false {% end %}
@@ -200,7 +201,7 @@ qualname = routes.middleware
 # "level = DEBUG" logs the route matched and routing variables.
 
 [logger_adhocracy]
-{% if parts.adhocracy.debug == 'True' %}level = Debug  {% end %}
+{% if parts.adhocracy.debug == 'True' %}level = DEBUG {% end %}
 {% if parts.adhocracy.debug != 'True' %}level = INFO {% end %}
 handlers =
 qualname = adhocracy
