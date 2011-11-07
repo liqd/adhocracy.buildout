@@ -54,6 +54,7 @@ read_network = True
 rules = ${parts.adhocracy_code.diazo_theme_rules_dir}/rules.xml
 wordpress_rules_dir = ${parts.adhocracy_code.diazo_wordpress_rules_dir}
 prefix = /static_theme
+doctype = <!DOCTYPE html>
 {% if parts.adhocracy.debug == 'True' %}debug = true  {% end %}
 {% if parts.adhocracy.debug != 'True' %}debug = false {% end %}
 wordpress_backend = ${parts.domains.blog} 
