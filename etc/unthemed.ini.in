@@ -5,14 +5,13 @@
 ############################################################
 
 {% python
-adhocracy_domain = parts['domains']['main_unthemed']
+adhocracy_domain = parts['domains']['main']
 if parts['domains'].get('main_unthemed.force_port', None):
    adhocracy_domain += ':%s' % parts['ports']['main_unthemed']
 %}
-adhocracy.domain = ${adhocracy_domain}
 
 [app:content]
-adhocracy.domain = ${parts.domains.main_unthemed}:${parts.ports.main_unthemed}
+adhocracy.domain = ${adhocracy_domain}
 
 [server:main]
 port = ${parts.ports.main_unthemed}
