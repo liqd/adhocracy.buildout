@@ -110,7 +110,7 @@ sqlalchemy.url = ${parts.adhocracy['sqlalchemy.url']}
 ## adhocracy.setup.drop = KILL_EM_ALL
 #
 
-adhocracy.solr.url = http://${parts.domains.main}:${parts.ports.solr}/solr
+adhocracy.solr.url = http://${parts.solr.host}:${parts.solr.port}/solr
 
 # WARNING: *THE LINE BELOW MUST BE UNCOMMENTED ON A PRODUCTION ENVIRONMENT*
 # Debug mode will enable the interactive debugging tool, allowing ANYONE to
