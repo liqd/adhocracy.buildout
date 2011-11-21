@@ -13,7 +13,7 @@ error_email_from = ${parts.adhocracy['email.from']}
 
 [server:main]
 use = egg:Paste#http
-host = 127.0.0.1
+host = ${parts.adhocracy.host}
 port = ${parts.ports.main}
 {% if parts.adhocracy.debug == 'True' %}use_threadpool = False  {% end %}
 {% if parts.adhocracy.debug != 'True' %}use_threadpool = True {% end %}
@@ -119,8 +119,14 @@ adhocracy.solr.url = http://${parts.solr.host}:${parts.solr.port}/solr
 {% if parts.adhocracy.debug != 'True' %}set debug = false {% end %}
 
 # INSTALL: Set up the Adhocracy domain name. This will be used to determine the
-# active instance, e.g. "Test Instance" for test.adhocracy.lan. 
-adhocracy.domain = ${parts.domains.main}${parts.domains['main.force_port']}
+# active instance, e.g. "Test Instance" for test.adhocracy.lan.
+
+{% python
+adhocracy_domain = parts['domains']['main']
+if parts['domains'].get('main.force_port', None):
+   adhocracy_domain += ':%s' % parts['ports']['main']
+%}
+adhocracy.domain = ${adhocracy_domain}
 adhocracy.protocol = ${parts.adhocracy.protocol}
 
 # INSTALL: Set a site name for all instances. This will be used as a part of 
