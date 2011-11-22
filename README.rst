@@ -85,7 +85,7 @@ Run
 
    # (Re)Run paster setup-app to set up or update the database
    # structure.
-   $ bin/paster setup-app etc/development.ini --name=content
+   $ bin/paster setup-app etc/adhocracy.ini --name=content
 
 
    # Start all dependency servers:
@@ -98,7 +98,7 @@ Run
    # $ bin/supervisorctl stop <name>
 
    Start the adhocracy server in foreground mode:
-   $ bin/paster serve etc/development.ini
+   $ bin/paster serve etc/adhocracy.ini
 
 
 
