@@ -11,6 +11,9 @@ installed_eggs
 .*\.egg-info$
 .*\.pyo$
 .*\.pyc$
+.*\.swp$
+.*\.swo$
+.*~$
 \.coverage
 \.mr.developer.cfg
 \.installed.cfg
