@@ -8,7 +8,7 @@
 
 # Uncomment and replace with the address which should receive any error reports
 email_to = ${parts.adhocracy['email.to']}
-smtp_server = localhost
+smtp_server = ${parts.adhocracy['smtp_server']}
 error_email_from = ${parts.adhocracy['email.from']} 
 
 [server:main]
