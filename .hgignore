@@ -17,7 +17,8 @@ installed_eggs
 \.coverage
 \.mr.developer.cfg
 \.installed.cfg
-etc/development.ini
+etc/adhocracy.ini
 etc/rabbitmq-env.conf
-etc/vhost_adhocracy_bundestag.conf
-etc/vhost_adhocracy_bundestag_develop.conf
+etc/unthemed.ini
+etc/vhost.conf
+
