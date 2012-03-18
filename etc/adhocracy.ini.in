@@ -187,6 +187,9 @@ adhocracy.cache_tiles = True
 piwik.site = 
 piwik.id = 
 
+# activate geo features
+adhocracy.proposal_geotags = True
+
 # Logging configuration
 [loggers]
 keys = root, adhocracy, sqlalchemy
