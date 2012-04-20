@@ -15,6 +15,7 @@ OPTIONS:
 EOF
 }
 
+install_geo=false
 buildout_variant=testing
 modify_dns=false
 while getopts dD name
@@ -26,6 +27,7 @@ do
           exit 2;;
     esac
 done
+
 
 if [ "$buildout_variant" = "development" ]; then
 	BITBUCKET_PREFIX=ssh://hg@bitbucket.org
@@ -59,12 +61,14 @@ $SUDO_CMD a2enmod proxy proxy_http proxy_html
 # Set up postgreSQL
 # Since we're using postgreSQL 8.4 which doesn't have CREATE USER IF NOT EXISTS, we're using the following hack ...
 echo "DROP ROLE IF EXISTS adhocracy; CREATE USER adhocracy PASSWORD 'adhoc';" | $SUDO_CMD su postgres -c 'psql'
-$SUDO_CMD su postgres -c '
-	createdb adhocracy --owner adhocracy;
-	createlang plpgsql adhocracy;
-	psql -d adhocracy -f /usr/share/postgresql/8.4/contrib/postgis-1.5/postgis.sql  >/dev/null 2>&1;
-	psql -d adhocracy -f /usr/share/postgresql/8.4/contrib/postgis-1.5/spatial_ref_sys.sql  >/dev/null 2>&1;
-	psql -d adhocracy -f /usr/share/postgresql/8.4/contrib/postgis_comments.sql >/dev/null 2>&1;'
+$SUDO_CMD su postgres -c 'createdb adhocracy --owner adhocracy;'
+if $install_geo; then
+	$SUDO_CMD su postgres -c 'createdb adhocracy --owner adhocracy;
+		createlang plpgsql adhocracy;
+		psql -d adhocracy -f /usr/share/postgresql/8.4/contrib/postgis-1.5/postgis.sql  >/dev/null 2>&1;
+		psql -d adhocracy -f /usr/share/postgresql/8.4/contrib/postgis-1.5/spatial_ref_sys.sql  >/dev/null 2>&1;
+		psql -d adhocracy -f /usr/share/postgresql/8.4/contrib/postgis_comments.sql >/dev/null 2>&1;'
+fi
 
 if [ -x adhocracy_buildout/bin/supervisorctl ]; then
 	adhocracy_buildout/bin/supervisorctl stop all
