@@ -43,25 +43,25 @@ section to a branch name, a revision or a tag name, e.g.::
     branch = release-1.2a2
 
 
-Install 
---------
+Installation on debian or Ubuntu
+--------------------------------
 
-Install dependencies (Debian 6.0 / Ubuntu 10.04 example)::
+Simply run:
 
-   $ sudo apt-get install libpng-dev libjpeg-dev gcc
-   $ sudo apt-get install make build-essential bin86 unzip 
-   $ sudo apt-get install libpcre3-dev zlib1g-dev mercurial
-   $ sudo apt-get install python python-virtualenv python-dev
-   $ sudo apt-get install libsqlite3-dev postgresql-server-dev-8.4
-   $ sudo apt-get install openjdk-6-jre 
-   $ sudo apt-get install erlang-dev erlang-mnesia erlang-os-mon xsltproc
+::
 
-To make the apache vhost work run::
+   $ wget -O- -q https://bitbucket.org/phihag/adhocracy.buildout/raw/tip/build_debian.sh | sh -s -- -D
 
-   $ sudo apt-get install libapache2-mod-proxy-html
-   $ sudo a2enmod proxy proxy_http proxy_html
+The script will use sudo to install the required dependencies, and install, set up, and start the required services.
 
-You should make a virtual env::
+Add the `-d` flag if you're an active developer with a bitbucket account.
+
+Installation on other systems
+-----------------------------
+
+On other systems, you can install the dependencies and manually make a virtualenv:
+
+::
 
    $ mkdir adhocracy_buildout 
    $ virtualenv --distribute --no-site-packages adhocracy_buildout
