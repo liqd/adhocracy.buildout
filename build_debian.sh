@@ -118,13 +118,13 @@ echo 'Use adhocracy_buildout/bin/supervisorctl to control running services. Curr
 bin/supervisorctl status
 sleep 10
 if bin/supervisorctl status | grep -vq RUNNING; then
-	echo 'Failed to start all services!'
+	echo "Failed to start all services!"
 	bin/supervisorctl status
 	exit 31
 else
-	echo ''
-	echo ''
-	echo 'Type  ./paster_interactive.sh  to run the interactive paster daemon.'
-	echo 'Then, navigate to  http://adhocracy.lan:5001/  to see adhocracy!'
+	echo
+	echo
+	echo "Type  ./paster_interactive.sh  to run the interactive paster daemon."
+	echo "Then, navigate to  http://adhocracy.lan:5001/  to see adhocracy!"
 fi
 
