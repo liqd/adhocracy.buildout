@@ -50,7 +50,7 @@ Simply run:
 
 ::
 
-   $ wget -O- -q https://bitbucket.org/phihag/adhocracy.buildout/raw/tip/build_debian.sh | sh -s -- -D
+   $ wget -O- -q https://bitbucket.org/phihag/adhocracy.buildout/raw/tip/build_debian.sh | sh -s --
 
 The script will use sudo to install the required dependencies, and install, set up, and start the required services.
 

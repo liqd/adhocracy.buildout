@@ -11,7 +11,7 @@ Install adhocracy on debian.
 OPTIONS:
    -h      Show this message
    -d      Developer mode; (i.e. configured bitbucket account)
-   -D      Modify DNS configuration
+   -D      Install a DNS server to answer *.adhocracy.lan
 EOF
 }
 
@@ -104,17 +104,19 @@ if $modify_dns; then
 	/bin/echo -e 'address=/.adhocracy.lan/127.0.0.1\nresolv-file=/etc/dnsmasq.resolv.conf' | $SUDO_CMD tee /etc/dnsmasq.d/adhocracy.lan.conf >/dev/null
 	/bin/echo -e 'nameserver 8.8.8.8\nnameserver 8.8.4.4\n' | $SUDO_CMD tee /etc/dnsmasq.resolv.conf >/dev/null
 	$SUDO_CMD sed -i 's/^#IGNORE_RESOLVCONF=yes$/IGNORE_RESOLVCONF=yes/' /etc/default/dnsmasq >/dev/null
-	#/bin/echo -e '#!/bin/sh\nmake_resolv_conf(){}' | $SUDO_CMD tee /etc/dhcp3/dhclient-enter-hooks.d/disable_make_resolv_conf  >/dev/null
 	# This is hack-ish, but it works no matter how exotic the configuration is
 	if $SUDO_CMD test -w /etc/resolv.conf; then
 		echo 'nameserver 127.0.0.1' | $SUDO_CMD tee /etc/resolv.conf >/dev/null
 		$SUDO_CMD chattr +i /etc/resolv.conf
 	fi
 	$SUDO_CMD /etc/init.d/dnsmasq restart
+else
+	if grep -qv adhocracy.lan /etc/hosts; then
+		$SUDO_CMD sh -c 'echo 127.0.0.1 adhocracy.lan test.adhocracy.lan >> /etc/hosts'
+	fi
 fi
 
-
-echo 'Use adhocracy_buildout/bin/supervisorctl to control running services. Current status:'
+echo "Use adhocracy_buildout/bin/supervisorctl to control running services. Current status:"
 bin/supervisorctl status
 sleep 10
 if bin/supervisorctl status | grep -vq RUNNING; then
