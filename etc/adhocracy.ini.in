@@ -80,6 +80,7 @@ suppress_http_headers = accept-encoding
 use = egg:adhocracy
 full_stack = true
 static_files = true
+adhocracy.translations = adhocracy.offenekommune_theme
 
 cache_dir = ${parts.buildout.directory}/var/data
 beaker.session.key = adhocracy_state
@@ -186,6 +187,9 @@ adhocracy.cache_tiles = True
 # Statistics via Piwik
 piwik.site = 
 piwik.id = 
+
+# activate geo features
+adhocracy.proposal_geotags = True
 
 # Logging configuration
 [loggers]
