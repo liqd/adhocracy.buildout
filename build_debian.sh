@@ -12,28 +12,42 @@ OPTIONS:
    -h      Show this message
    -d      Developer mode; (i.e. configured bitbucket account)
    -D      Install a DNS server to answer *.adhocracy.lan
+   -p      Use postgres (for automated performance/integration tests)
 EOF
 }
 
+use_postgres=false
 install_geo=false
 buildout_variant=testing
 modify_dns=false
+developer_mode=false
 while getopts dD name
 do
     case $name in
-    d)    buildout_variant=development;;
+    d)    developer_mode=true;;
     D)    modify_dns=true;;
     ?)   usage
           exit 2;;
     esac
 done
 
-
-if [ "$buildout_variant" = "development" ]; then
+if $developer_mode; then
 	BITBUCKET_PREFIX=ssh://hg@bitbucket.org
+	if $use_postgres; then
+		echo "postgres not supported in developer mode!"
+		exit 1
+	else
+		buildout_variant=developer
+	fi
 else
 	BITBUCKET_PREFIX=https://bitbucket.org
+	if $use_postgres; then
+		buildout_variant=testing_postgres
+	else
+		buildout_variant=testing
+	fi
 fi
+
 BUILDOUT_URL=${BITBUCKET_PREFIX}/phihag/adhocracy.buildout
 
 SUDO_CMD=sudo
@@ -55,19 +69,24 @@ if [ '!' -w adhocracy_buildout ]; then
 	exit 22
 fi
 
-$SUDO_CMD apt-get install -yqq libpng-dev libjpeg-dev gcc make build-essential bin86 unzip libpcre3-dev zlib1g-dev mercurial python python-virtualenv python-dev libsqlite3-dev postgresql-8.4 postgresql-server-dev-8.4 openjdk-6-jre erlang-dev erlang-mnesia erlang-os-mon xsltproc libapache2-mod-proxy-html postgresql-8.4-postgis
+$SUDO_CMD apt-get install -yqq libpng-dev libjpeg-dev gcc make build-essential bin86 unzip libpcre3-dev zlib1g-dev mercurial python python-virtualenv python-dev libsqlite3-dev openjdk-6-jre erlang-dev erlang-mnesia erlang-os-mon xsltproc libapache2-mod-proxy-html
+if $use_postgres; then
+	$SUDO_CMD apt-get install -yqq postgresql-8.4 postgresql-server-dev-8.4 postgresql-8.4-postgis
+fi
 $SUDO_CMD a2enmod proxy proxy_http proxy_html
 
-# Set up postgreSQL
-# Since we're using postgreSQL 8.4 which doesn't have CREATE USER IF NOT EXISTS, we're using the following hack ...
-echo "DROP ROLE IF EXISTS adhocracy; CREATE USER adhocracy PASSWORD 'adhoc';" | $SUDO_CMD su postgres -c 'psql'
-$SUDO_CMD su postgres -c 'createdb adhocracy --owner adhocracy;' || true
-if $install_geo; then
-	$SUDO_CMD su postgres -c '
-		createlang plpgsql adhocracy;
-		psql -d adhocracy -f /usr/share/postgresql/8.4/contrib/postgis-1.5/postgis.sql  >/dev/null 2>&1;
-		psql -d adhocracy -f /usr/share/postgresql/8.4/contrib/postgis-1.5/spatial_ref_sys.sql  >/dev/null 2>&1;
-		psql -d adhocracy -f /usr/share/postgresql/8.4/contrib/postgis_comments.sql >/dev/null 2>&1;'
+if $use_postgres; then
+	# Set up postgreSQL
+	# Since we're using postgreSQL 8.4 which doesn't have CREATE USER IF NOT EXISTS, we're using the following hack ...
+	echo "DROP ROLE IF EXISTS adhocracy; CREATE USER adhocracy PASSWORD 'adhoc';" | $SUDO_CMD su postgres -c 'psql'
+	$SUDO_CMD su postgres -c 'createdb adhocracy --owner adhocracy;' || true
+	if $install_geo; then
+		$SUDO_CMD su postgres -c '
+			createlang plpgsql adhocracy;
+			psql -d adhocracy -f /usr/share/postgresql/8.4/contrib/postgis-1.5/postgis.sql  >/dev/null 2>&1;
+			psql -d adhocracy -f /usr/share/postgresql/8.4/contrib/postgis-1.5/spatial_ref_sys.sql  >/dev/null 2>&1;
+			psql -d adhocracy -f /usr/share/postgresql/8.4/contrib/postgis_comments.sql >/dev/null 2>&1;'
+	fi
 fi
 
 if [ -x adhocracy_buildout/bin/supervisorctl ]; then
