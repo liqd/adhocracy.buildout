@@ -32,9 +32,9 @@ do
 done
 
 if $use_postgres; then
-	buildout_variant=developer_postgres
+	buildout_variant=development_postgres
 else
-	buildout_variant=developer
+	buildout_variant=development
 fi
 
 

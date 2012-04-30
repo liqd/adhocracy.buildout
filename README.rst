@@ -54,7 +54,6 @@ Simply run:
 
 The script will use sudo to install the required dependencies, and install, set up, and start the required services.
 
-Add the `-d` flag if you're an active developer with a bitbucket account.
 
 Installation on other systems
 -----------------------------
@@ -69,8 +68,7 @@ On other systems, you can install the dependencies and manually make a virtualen
    $ source bin/activate
 
 
-Run buildout
-------------
+Run buildout with:
 
 ::
 
@@ -78,8 +76,7 @@ Run buildout
    $ bin/buildout -Nc buildout_development.cfg
 
 
-Run
----
+Run adhocracy with
 
 ::
 
