@@ -25,12 +25,17 @@ do
     case $name in
     d)    developer_mode=true;;
     D)    modify_dns=true;;
-    p)    buildout_variant=development_postgres;;
+    p)    use_postgres=true;;
     ?)   usage
           exit 2;;
     esac
 done
 
+if $use_postgres; then
+	buildout_variant=developer_postgres
+else
+	buildout_variant=developer
+fi
 
 
 BUILDOUT_URL=https://bitbucket.org/phihag/adhocracy.buildout
