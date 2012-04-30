@@ -25,7 +25,7 @@ do
     case $name in
     d)    developer_mode=true;;
     D)    modify_dns=true;;
-    p)    buildout_variant=development_postgres
+    p)    buildout_variant=development_postgres;;
     ?)   usage
           exit 2;;
     esac
