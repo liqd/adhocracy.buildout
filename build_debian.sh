@@ -10,7 +10,6 @@ Install adhocracy on debian.
 
 OPTIONS:
    -h      Show this message
-   -d      Developer mode; (i.e. configured bitbucket account)
    -D      Install a DNS server to answer *.adhocracy.lan
    -p      Use postgres (for automated performance/integration tests)
 EOF
@@ -18,7 +17,7 @@ EOF
 
 use_postgres=false
 install_geo=false
-buildout_variant=testing
+buildout_variant=development
 modify_dns=false
 developer_mode=false
 while getopts dD name
@@ -31,24 +30,14 @@ do
     esac
 done
 
-if $developer_mode; then
-	BITBUCKET_PREFIX=ssh://hg@bitbucket.org
-	if $use_postgres; then
-		echo "postgres not supported in developer mode!"
-		exit 1
-	else
-		buildout_variant=developer
-	fi
+
+if $use_postgres; then
+	buildout_variant=testing_postgres
 else
-	BITBUCKET_PREFIX=https://bitbucket.org
-	if $use_postgres; then
-		buildout_variant=testing_postgres
-	else
-		buildout_variant=testing
-	fi
+	buildout_variant=testing
 fi
 
-BUILDOUT_URL=${BITBUCKET_PREFIX}/phihag/adhocracy.buildout
+BUILDOUT_URL=https://bitbucket.org/phihag/adhocracy.buildout
 
 SUDO_CMD=sudo
 if [ "$(id -u)" -eq 0 ]; then
