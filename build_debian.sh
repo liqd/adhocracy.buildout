@@ -12,27 +12,38 @@ OPTIONS:
    -h      Show this message
    -D      Install a DNS server to answer *.adhocracy.lan
    -p      Use postgres (for automated performance/integration tests)
+   -m      Use MySQL
 EOF
 }
 
 use_postgres=false
+use_mysql=false
 install_geo=false
 buildout_variant=development
 modify_dns=false
 developer_mode=false
-while getopts dDp name
+while getopts dDpm name
 do
     case $name in
     d)    developer_mode=true;;
     D)    modify_dns=true;;
     p)    use_postgres=true;;
+    m)    use_mysql=true;;
     ?)   usage
           exit 2;;
     esac
 done
 
+if $use_postgres && $use_mysql; then
+	echo 'Cannot use Postgres AND MySQL.'
+	exit 3
+fi
+
 if $use_postgres; then
 	buildout_variant=development_postgres
+elif $use_mysql; then
+	buildout_variant=development_mysql
+	MYSQL_ROOTPW="sqlrootpw"
 else
 	buildout_variant=development
 fi
@@ -63,6 +74,13 @@ $SUDO_CMD apt-get install -yqq libpng-dev libjpeg-dev gcc make build-essential b
 if $use_postgres; then
 	$SUDO_CMD apt-get install -yqq postgresql-8.4 postgresql-server-dev-8.4 postgresql-8.4-postgis
 fi
+if $use_mysql; then
+	echo "mysql mysql-server/root_password string ${MYSQL_ROOTPW}" | $SUDO_CMD debconf-set-selections
+        echo "mysql mysql-server/root_password_again string ${MYSQL_ROOTPW}" | $SUDO_CMD debconf-set-selections
+	$SUDO_CMD apt-get install -yqq mysql-server libmysqld-dev python-mysqldb
+	$SUDO_CMD sed -i "s%^bind-address.*%\#bind-address = 127.0.0.1\nskip-networking%" /etc/mysql/my.cnf
+        $SUDO_CMD /etc/init.d/mysql restart
+fi
 $SUDO_CMD a2enmod proxy proxy_http proxy_html
 
 if $use_postgres; then
@@ -77,6 +95,14 @@ if $use_postgres; then
 			psql -d adhocracy -f /usr/share/postgresql/8.4/contrib/postgis-1.5/spatial_ref_sys.sql  >/dev/null 2>&1;
 			psql -d adhocracy -f /usr/share/postgresql/8.4/contrib/postgis_comments.sql >/dev/null 2>&1;'
 	fi
+fi
+
+if $use_mysql; then
+	echo "CREATE DATABASE IF NOT EXISTS adhocracy; \
+              GRANT ALL PRIVILEGES ON adhocracy . * TO 'adhocracy'@'localhost' IDENTIFIED BY 'adhoc'; \
+              FLUSH PRIVILEGES;" \
+          | mysql --user root --password=${MYSQL_ROOTPW}
+
 fi
 
 if [ -x adhocracy_buildout/bin/supervisorctl ]; then

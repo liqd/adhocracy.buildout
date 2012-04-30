@@ -54,7 +54,7 @@ Simply run:
 
 The script will use sudo to install the required dependencies, and install, set up, and start the required services.
 
-Add the `-p` option to use PostgreSQL instead of the default sqlite.
+Add the `-p` option to use PostgreSQL or the `-m` option to use MySQL instead of the default sqlite.
 
 Installation on other systems
 -----------------------------
