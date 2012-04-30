@@ -13,6 +13,7 @@ OPTIONS:
    -D      Install a DNS server to answer *.adhocracy.lan
    -p      Use postgres (for automated performance/integration tests)
    -m      Use MySQL
+   -A      Do not start automatically
 EOF
 }
 
@@ -22,13 +23,15 @@ install_geo=false
 buildout_variant=development
 modify_dns=false
 developer_mode=false
-while getopts dDpm name
+autostart=true
+while getopts dDpmA name
 do
     case $name in
     d)    developer_mode=true;;
     D)    modify_dns=true;;
     p)    use_postgres=true;;
     m)    use_mysql=true;;
+    A)    autostart=false;;
     ?)   usage
           exit 2;;
     esac
@@ -131,8 +134,6 @@ bin/paster setup-app etc/adhocracy.ini --name=content
 
 ln -sf adhocracy_buildout/adhocracy.buildout/paster_interactive.sh "$ORIGINAL_PWD"
 
-bin/supervisord
-
 # Set up DNS names
 if $modify_dns; then
 	$SUDO_CMD apt-get install -qqy dnsmasq
@@ -151,17 +152,20 @@ else
 	fi
 fi
 
-echo "Use adhocracy_buildout/bin/supervisorctl to control running services. Current status:"
-bin/supervisorctl status
-sleep 10
-if bin/supervisorctl status | grep -vq RUNNING; then
-	echo "Failed to start all services!"
+if $autostart; then
+	bin/supervisord
+	echo "Use adhocracy_buildout/bin/supervisorctl to control running services. Current status:"
 	bin/supervisorctl status
-	exit 31
-else
-	echo
-	echo
-	echo "Type  ./paster_interactive.sh  to run the interactive paster daemon."
-	echo "Then, navigate to  http://adhocracy.lan:5001/  to see adhocracy!"
+	sleep 10
+	if bin/supervisorctl status | grep -vq RUNNING; then
+		echo "Failed to start all services!"
+		bin/supervisorctl status
+		exit 31
+	else
+		echo
+		echo
+		echo "Type  ./paster_interactive.sh  to run the interactive paster daemon."
+		echo "Then, navigate to  http://adhocracy.lan:5001/  to see adhocracy!"
+	fi
 fi
 
