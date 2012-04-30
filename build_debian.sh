@@ -20,7 +20,7 @@ install_geo=false
 buildout_variant=development
 modify_dns=false
 developer_mode=false
-while getopts dD name
+while getopts dDp name
 do
     case $name in
     d)    developer_mode=true;;
