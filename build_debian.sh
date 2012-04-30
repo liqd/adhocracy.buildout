@@ -49,7 +49,7 @@ else
 fi
 
 
-BUILDOUT_URL=https://bitbucket.org/phihag/adhocracy.buildout
+BUILDOUT_URL=https://bitbucket.org/liqd/adhocracy.buildout
 
 SUDO_CMD=sudo
 if [ "$(id -u)" -eq 0 ]; then
