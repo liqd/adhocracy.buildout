@@ -147,7 +147,7 @@ if $modify_dns; then
 	fi
 	$SUDO_CMD /etc/init.d/dnsmasq restart
 else
-	if grep -qv adhocracy.lan /etc/hosts; then
+	if ! grep -q adhocracy.lan /etc/hosts; then
 		$SUDO_CMD sh -c 'echo 127.0.0.1 adhocracy.lan test.adhocracy.lan >> /etc/hosts'
 	fi
 fi
