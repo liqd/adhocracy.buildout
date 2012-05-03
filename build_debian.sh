@@ -1,6 +1,7 @@
 #!/bin/sh
 
 BUILDOUT_URL=https://bitbucket.org/phihag/adhocracy.buildout
+PORTS=5001 5005 5006 5010
 
 set -e
 
@@ -113,6 +114,9 @@ if [ -x adhocracy_buildout/bin/supervisorctl ]; then
 	adhocracy_buildout/bin/supervisorctl stop all
 	adhocracy_buildout/bin/supervisorctl shutdown
 fi
+
+python ./etc/test-port-free.py -g 10 --kill-pid $PORTS
+
 
 virtualenv --distribute --no-site-packages adhocracy_buildout
 ORIGINAL_PWD=$(pwd)
