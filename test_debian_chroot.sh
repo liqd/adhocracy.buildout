@@ -5,11 +5,13 @@ SUPERVISOR_PORTS="5005 5006 5010"
 
 set -e
 
-if [ "$#" -ne 1 ]; then
+if [ "$#" -eq 0 ]; then
+	chroot_path=./adhocracy-test-chroot
+elif [ "$#" -ne 1 ]; then
+	chroot_path=$1
 	echo "Usage: $0 chroot_path"
 	exit 21
 fi
-chroot_path=$1
 
 if [ "$(id -u)" -ne 0 ]; then
 	echo 'You need to be root to run this script.'
