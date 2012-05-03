@@ -85,7 +85,7 @@ if $use_mysql; then
 	$SUDO_CMD sed -i "s%^bind-address.*%\#bind-address = 127.0.0.1\nskip-networking%" /etc/mysql/my.cnf
         $SUDO_CMD /etc/init.d/mysql restart
 fi
-$SUDO_CMD a2enmod proxy proxy_http proxy_html
+$SUDO_CMD a2enmod proxy proxy_http proxy_html >/dev/null
 
 if $use_postgres; then
 	# Set up postgreSQL
