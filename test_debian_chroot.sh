@@ -1,6 +1,7 @@
 #!/bin/sh
 
 # Test adhocracy in a chroot, on a debian(-ish) system
+SUPERVISOR_PORTS="5005 5006 5010"
 
 set -e
 
@@ -43,8 +44,10 @@ set -e
 cd /home/adhocracy/adhocracy_buildout
 . bin/activate
 
+bin/supervisorctl shutdown>/dev/null
+python ./adhocracy.buildout/etc/test-port-free.py -g 10 --kill-pid 5001 $SUPERVISOR_PORTS
 bin/supervisord
-python ./adhocracy.buildout/etc/test-port-free.py -o -g 10 5010 # Wait for supervisord to start
+python ./adhocracy.buildout/etc/test-port-free.py -o -g 10 $SUPERVISOR_PORTS # Wait for supervisord to start
 
 # Fail if not all services are marked as running
 if bin/supervisorctl status | grep -vq RUNNING; then
@@ -53,20 +56,15 @@ if bin/supervisorctl status | grep -vq RUNNING; then
 	exit 31
 fi
 
-./paster_interactive.sh &
-paster_pid=$!
+sh ./paster_interactive.sh &
+paster_pid="\$!"
 
-# TODO DEBUG
-echo RUNNING AS PID ${paster_pid}
-netstat -ltpn
-
-sleep 10 # TODO find a better way to wait for service startup
-
+python ./adhocracy.buildout/etc/test-port-free.py -o -g 10 5001
 
 # TODO run actual tests
 wget -nv -O /dev/null http://adhocracy.lan:5001/
 
-kill "$paster_pid"
+kill "\$paster_pid"
 bin/supervisorctl shutdown
 EOF
 chmod a+x $chroot_path/adhocracy-runtests.sh
@@ -112,11 +110,13 @@ rm -f /etc/sudoers
 
 if su adhocracy -c '/adhocracy-runtests.sh'; then
 	echo TESTS PASSED, leaving chroot ...
+	umount /proc
 else
 	echo TESTS FAILED.
+	# Leave everything as-is to allow interactive debugging
+	# The next test run will clean up
 fi
 
-umount /proc
 EOF
 
 chroot $chroot_path sh /test_in_chroot.sh
