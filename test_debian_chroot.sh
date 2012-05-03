@@ -1,8 +1,6 @@
 #!/bin/sh
 
 # Test adhocracy in a chroot, on a debian(-ish) system
-BUILDOUT_URL=
-
 
 set -e
 
@@ -34,11 +32,41 @@ fi
 
 echo adhocracy-chroot | $SUDO_CMD tee $chroot_path/etc/debian_chroot >/dev/null
 
+# sudo complains if it can't resolve the hostname, suppress that
+if ! grep -P -q "\s$(hostname)(?:\s|$)" $chroot_path/etc/hosts; then
+	sudo sh -c "echo 127.0.0.1 $(hostname) >> $chroot_path/etc/hosts"
+fi
+
+$SUDO_CMD tee $chroot_path/adhocracy-runtests.sh >/dev/null <<EOF
+#!/bin/sh
+# This is the test script, run by the user adhocracy
+
+set -e
+
+cd /home/adhocracy/adhocracy_buildout
+. bin/activate
+
+bin/supervisord
+sleep 10 # TODO find a better way to wait for service startup
+
+# Fail if not all services are marked as running
+bin/supervisorctl status | grep -vq RUNNING
+
+sleep 10 # TODO find a better way to wait for service startup
+
+# TODO run actual tests
+wget -O /dev/null http://adhocracy.lan:5001/
+
+
+bin/supervisorctl shutdown
+EOF
+sudo chmod a+x $chroot_path/adhocracy-runtests.sh
 
 $SUDO_CMD tee $chroot_path/test_in_chroot.sh >/dev/null <<EOF
 #!/bin/sh
-set -e
+# Setup this chroot and execute the tests
 
+set -e
 
 if ! mountpoint -q /proc; then
 	mount -t proc proc /proc
@@ -58,9 +86,6 @@ adhocracy ALL=(ALL:ALL) NOPASSWD:ALL
 ' > /etc/sudoers
 chmod 0440 /etc/sudoers
 
-hostname adhocracy-chroot
-grep -q adhocracy-chroot /etc/hosts || echo 127.0.0.1 adhocracy-chroot >> /etc/hosts
-
 # Configure initial packages for the system
 apt-get update -qq
 if [ ! -d /usr/lib/locale ]; then
@@ -77,8 +102,7 @@ su adhocracy -c 'wget -nv https://bitbucket.org/phihag/adhocracy.buildout/raw/de
 
 rm -f /etc/sudoers
 
-# TODO start services
-
+su adhocracy -c '/adhocracy-runtests.sh'
 
 umount /proc
 EOF
