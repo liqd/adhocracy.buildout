@@ -1,4 +1,7 @@
 #!/bin/sh
+
+BUILDOUT_URL=https://bitbucket.org/phihag/adhocracy.buildout
+
 set -e
 
 usage()
@@ -51,8 +54,6 @@ else
 	buildout_variant=development
 fi
 
-
-BUILDOUT_URL=https://bitbucket.org/phihag/adhocracy.buildout
 
 SUDO_CMD=sudo
 if [ "$(id -u)" -eq 0 ]; then
@@ -117,9 +118,9 @@ virtualenv --distribute --no-site-packages adhocracy_buildout
 ORIGINAL_PWD=$(pwd)
 cd adhocracy_buildout
 if [ -e adhocracy.buildout ]; then
-	hg pull -u -R adhocracy.buildout
+	hg pull --quiet -u -R adhocracy.buildout
 else
-	hg clone $BUILDOUT_URL adhocracy.buildout
+	hg clone --quiet $BUILDOUT_URL adhocracy.buildout
 fi
 
 for f in adhocracy.buildout/*; do ln -sf $f; done
