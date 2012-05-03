@@ -137,20 +137,12 @@ def checkOnce(opts, ports):
 def main():
 	from optparse import OptionParser
 	parser = OptionParser(usage='usage: %prog [options] port [port..]')
-	parser.add_option('-u', '--unprivileged', dest='unprivileged', action='store_true', default=False, help='do not exit if necessary preconditions fail')
 	parser.add_option('-o', '--open', dest='open', action='store_true', default=False, help='require ports to be opened by a process instead of free')
 	parser.add_option('-k', '--kill-pid', dest='kill', action='store_const', const='pid', default=None, help='kill offending processes by process id')
 	parser.add_option('--kill-pgid', dest='kill', action='store_const', const='pgid', default=None, help='kill the offending process groups')
 	parser.add_option('--kill-signal', dest='killSignalStr', default=signal.SIGTERM, help='Use the specified signal instead of SIGTERM', metavar='SIGNAL')
 	parser.add_option('-g', '--grace-period', dest='gracePeriod', type='float', default=None, help='Seconds to wait for the condition to be fulfilled', metavar='SECONDS')
 	(opts, args) = parser.parse_args()
-
-	if os.getuid() != 0:
-		if opts.unprivileged:
-			sys.stderr.write('Warning: You must be root to be able to view and kill all processes.\n')
-		else:
-			sys.stderr.write('You must be root to be able to view and kill all processes. Terminating.\n')
-			sys.exit(2)
 
 	ports = map(int, args)
 	if len(ports) == 0:

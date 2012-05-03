@@ -1,7 +1,7 @@
 #!/bin/sh
 
 BUILDOUT_URL=https://bitbucket.org/phihag/adhocracy.buildout
-PORTS=5001 5005 5006 5010
+PORTS="5001 5005 5006 5010"
 
 set -e
 
