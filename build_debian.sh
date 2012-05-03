@@ -115,7 +115,10 @@ if [ -x adhocracy_buildout/bin/supervisorctl ]; then
 	adhocracy_buildout/bin/supervisorctl shutdown
 fi
 
-python ./etc/test-port-free.py -g 10 --kill-pid $PORTS
+if [ '!' -e ./test-port-free.py ]; then
+	wget -q $BUILDOUT_URL/raw/default/etc/test-port-free.py -O ./test-port-free.py
+fi
+python ./test-port-free.py -g 10 --kill-pid $PORTS
 
 
 virtualenv --distribute --no-site-packages adhocracy_buildout
