@@ -76,6 +76,10 @@ if [ '!' -w adhocracy_buildout ]; then
 fi
 
 $SUDO_CMD apt-get install -yqq libpng-dev libjpeg-dev gcc make build-essential bin86 unzip libpcre3-dev zlib1g-dev mercurial python python-virtualenv python-dev libsqlite3-dev openjdk-6-jre erlang-dev erlang-mnesia erlang-os-mon xsltproc libapache2-mod-proxy-html libpq-dev
+
+# Not strictly required, but needed to push to bitbucket via ssh
+$SUDO_CMD apt-get install -yqq openssh-client
+
 if $use_postgres; then
 	$SUDO_CMD apt-get install -yqq postgresql-8.4 postgresql-server-dev-8.4 postgresql-8.4-postgis
 fi
@@ -111,8 +115,7 @@ if $use_mysql; then
 fi
 
 if [ -x adhocracy_buildout/bin/supervisorctl ]; then
-	adhocracy_buildout/bin/supervisorctl stop all
-	adhocracy_buildout/bin/supervisorctl shutdown
+	adhocracy_buildout/bin/supervisorctl shutdown # TODO hide error message
 fi
 
 if [ '!' -e ./test-port-free.py ]; then
@@ -141,6 +144,7 @@ bin/buildout -Nc buildout_${buildout_variant}.cfg
 bin/paster setup-app etc/adhocracy.ini --name=content
 
 ln -sf adhocracy_buildout/adhocracy.buildout/paster_interactive.sh "$ORIGINAL_PWD"
+ln -sf adhocracy_buildout/src/adhocracy adhocracy
 
 # Set up DNS names
 if $modify_dns; then
@@ -164,6 +168,8 @@ if $autostart; then
 	bin/supervisord
 	echo "Use adhocracy_buildout/bin/supervisorctl to control running services. Current status:"
 	bin/supervisorctl status
+	# TODO do something more intelligent, like
+	# adhocracy.buildout/etc/test-port-free -o -g 10 "${PORTS}"
 	sleep 10
 	if bin/supervisorctl status | grep -vq RUNNING; then
 		echo "Failed to start all services!"

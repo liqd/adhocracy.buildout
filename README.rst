@@ -56,8 +56,30 @@ The script will use sudo to install the required dependencies, and install, set 
 
 Add the `-p` option to use PostgreSQL or the `-m` option to use MySQL instead of the default sqlite.
 
-Installation on other systems
------------------------------
+Developer Instructions
+----------------------
+
+adhocracy itself gets installed in `./adhocracy`. To use your own [fork](http://confluence.atlassian.com/display/BITBUCKET/Forking+a+bitbucket+Repository) instead of the regular("upstream") adhocracy, edit `./adhocracy/.hg/.hgrc` to say the following:
+
+::
+
+    [ui]
+    username = JOHN SMITH <john.smith@example.com>
+
+    [paths]
+    liqd = https://bitbucket.org/liqd/adhocracy
+    default = https://bitbucket.org/USERNAME/adhocracy
+
+    # Or, if you have an ssh key configured:
+    # (see SSH keys under https://bitbucket.org/account/ )
+    # default = ssh://hg@bitbucket.org/USERNAME/adhocracy
+
+Enter your real name and email address in the second line, and replace `USERNAME` with your bitbucket user name.
+
+You can now execute `hg pull -u liqd` to update your local copy with new upstream changes. Use [`commit`](http://mercurial.selenic.com/wiki/Commit) and [`push`](http://www.selenic.com/mercurial/hg.1.html#push) to record and publish your changes.  As soon as you are confident that you have implemented a feature or corrected a bug, create a [pull request](http://confluence.atlassian.com/display/BITBUCKET/Working+with+pull+requests) to ask the core developers to incorporate your changes.
+
+Installation on non-debian systems
+----------------------------------
 
 On other systems, you can install the dependencies and manually make a virtualenv:
 
