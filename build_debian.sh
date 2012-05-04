@@ -145,7 +145,7 @@ bin/buildout -Nc buildout_${buildout_variant}.cfg
 bin/paster setup-app etc/adhocracy.ini --name=content
 
 ln -sf adhocracy_buildout/adhocracy.buildout/paster_interactive.sh "$ORIGINAL_PWD"
-ln -sf adhocracy_buildout/src/adhocracy adhocracy
+ln -sf adhocracy_buildout/src/adhocracy "$ORIGINAL_PWD"
 
 # Set up DNS names
 if $modify_dns; then
