@@ -1,7 +1,8 @@
 #!/bin/sh
 
 BUILDOUT_URL=https://bitbucket.org/phihag/adhocracy.buildout
-PORTS="5001 5005 5006 5010"
+SUPERVISOR_PORTS="5005 5006 5010"
+PORTS="5001 ${SUPERVISOR_PORTS}"
 
 set -e
 
@@ -115,7 +116,7 @@ if $use_mysql; then
 fi
 
 if [ -x adhocracy_buildout/bin/supervisorctl ]; then
-	adhocracy_buildout/bin/supervisorctl shutdown # TODO hide error message
+	adhocracy_buildout/bin/supervisorctl shutdown >/dev/null
 fi
 
 if [ '!' -e ./test-port-free.py ]; then
@@ -168,9 +169,7 @@ if $autostart; then
 	bin/supervisord
 	echo "Use adhocracy_buildout/bin/supervisorctl to control running services. Current status:"
 	bin/supervisorctl status
-	# TODO do something more intelligent, like
-	# adhocracy.buildout/etc/test-port-free -o -g 10 "${PORTS}"
-	sleep 10
+	python adhocracy.buildout/etc/test-port-free.py -o -g 10 ${SUPERVISOR_PORTS}
 	if bin/supervisorctl status | grep -vq RUNNING; then
 		echo "Failed to start all services!"
 		bin/supervisorctl status
