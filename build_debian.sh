@@ -1,6 +1,6 @@
 #!/bin/sh
 
-BUILDOUT_URL=https://bitbucket.org/phihag/adhocracy.buildout
+BUILDOUT_URL=https://bitbucket.org/liqd/adhocracy.buildout
 SUPERVISOR_PORTS="5005 5006 5010"
 PORTS="5001 ${SUPERVISOR_PORTS}"
 

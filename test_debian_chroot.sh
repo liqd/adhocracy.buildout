@@ -106,7 +106,7 @@ fi
 apt-get install -yqq make sudo ca-certificates
 
 cd /home/adhocracy
-su adhocracy -c 'wget -nv https://bitbucket.org/phihag/adhocracy.buildout/raw/default/build_debian.sh -O build_debian.sh && sh build_debian.sh -A'
+su adhocracy -c 'wget -nv https://bitbucket.org/liqd/adhocracy.buildout/raw/default/build_debian.sh -O build_debian.sh && sh build_debian.sh -A'
 
 rm -f /etc/sudoers
 
@@ -114,9 +114,11 @@ if su adhocracy -c '/adhocracy-runtests.sh'; then
 	echo TESTS PASSED, leaving chroot ...
 	umount /proc
 else
+	rescode=$?
 	echo TESTS FAILED.
 	# Leave everything as-is to allow interactive debugging
 	# The next test run will clean up
+	exit $rescode
 fi
 
 EOF
