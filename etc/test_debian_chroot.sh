@@ -46,6 +46,9 @@ set -e
 cd /home/adhocracy/adhocracy_buildout
 . bin/activate
 
+# Run nosetest
+bin/test
+
 bin/supervisorctl shutdown>/dev/null
 python ./adhocracy.buildout/etc/test-port-free.py -g 10 --kill-pid 5001 $SUPERVISOR_PORTS
 bin/supervisord
@@ -63,7 +66,6 @@ paster_pid="\$!"
 
 python ./adhocracy.buildout/etc/test-port-free.py -o -g 10 5001
 
-# TODO run actual tests
 wget -nv -O /dev/null http://adhocracy.lan:5001/
 
 kill "\$paster_pid"
