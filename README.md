@@ -12,7 +12,7 @@ It sets up a bunch of servers and configures supervisor to run them:
 * solr (searching)
 * memcached (code cache)
 * rabbitmq (internal messaging queue)
-* supervisor 
+* supervisor
 
 Installation on debian or Ubuntu
 --------------------------------
@@ -89,7 +89,7 @@ domain, ports and server versions. You can overwrite settings from
 buildout_common.cfg in buildout_development.cfg. You can also use
 system packages, e.g. for solr or rabbitmq change the port settings in
 the buildout_*.cfg files and remove the sections form [buildout]
-"parts" and adjust the [supervisor] configurations, e.g.::
+"parts" and adjust the [supervisor] configurations, e.g.:
 
     [buildout]
     
@@ -107,7 +107,7 @@ the buildout_*.cfg files and remove the sections form [buildout]
 
 If you want to install a certain version of adhocracy, edit 
 buildout_development.cfg and change 'branch' in the [adhocracy_code] 
-section to a branch name, a revision or a tag name, e.g.::
+section to a branch name, a revision or a tag name, e.g.:
 
     [adhocracy_code]
     branch = release-1.2a2
