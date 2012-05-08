@@ -116,11 +116,11 @@ if su adhocracy -c '/adhocracy-runtests.sh'; then
 	echo TESTS PASSED, leaving chroot ...
 	umount /proc
 else
-	rescode=$?
+	rescode=\$?
 	echo TESTS FAILED.
 	# Leave everything as-is to allow interactive debugging
 	# The next test run will clean up
-	exit $rescode
+	exit "\$rescode"
 fi
 
 EOF
