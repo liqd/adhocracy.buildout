@@ -61,7 +61,7 @@ if bin/supervisorctl status | grep -vq RUNNING; then
 	exit 31
 fi
 
-sh ./paster_interactive.sh &
+bin/paster serve etc/adhocraccy.ini &
 paster_pid="\$!"
 
 python ./adhocracy.buildout/etc/test-port-free.py -o -g 10 5001
@@ -112,16 +112,18 @@ su adhocracy -c 'wget -nv https://bitbucket.org/liqd/adhocracy.buildout/raw/defa
 
 rm -f /etc/sudoers
 
+hgrev=\$(cd /home/adhocracy/adhocracy && hg id)
+
 if su adhocracy -c '/adhocracy-runtests.sh'; then
-	echo TESTS PASSED, leaving chroot ...
-	umount /proc
+	echo (\$hgrev) TESTS PASSED, leaving chroot ...
+	rescode=0
 else
 	rescode=\$?
-	echo TESTS FAILED.
-	# Leave everything as-is to allow interactive debugging
-	# The next test run will clean up
-	exit "\$rescode"
+	echo (\$hgrev) TESTS FAILED.
 fi
+
+umount /proc
+exit "\$rescode"
 
 EOF
 
