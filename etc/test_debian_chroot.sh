@@ -61,7 +61,7 @@ if bin/supervisorctl status | grep -vq RUNNING; then
 	exit 31
 fi
 
-bin/paster serve etc/adhocraccy.ini &
+bin/paster serve etc/adhocracy.ini &
 paster_pid="\$!"
 
 python ./adhocracy.buildout/etc/test-port-free.py -o -g 10 5001
@@ -115,11 +115,11 @@ rm -f /etc/sudoers
 hgrev=\$(cd /home/adhocracy/adhocracy && hg id)
 
 if su adhocracy -c '/adhocracy-runtests.sh'; then
-	echo (\$hgrev) TESTS PASSED, leaving chroot ...
+	echo "(\$hgrev) TESTS PASSED, leaving chroot ..."
 	rescode=0
 else
 	rescode=\$?
-	echo (\$hgrev) TESTS FAILED.
+	echo "(\$hgrev) TESTS FAILED."
 fi
 
 umount /proc
