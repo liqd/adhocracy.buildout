@@ -141,7 +141,8 @@ def main():
 	parser.add_option('-k', '--kill-pid', dest='kill', action='store_const', const='pid', default=None, help='kill offending processes by process id')
 	parser.add_option('--kill-pgid', dest='kill', action='store_const', const='pgid', default=None, help='kill the offending process groups')
 	parser.add_option('--kill-signal', dest='killSignalStr', default=signal.SIGTERM, help='Use the specified signal instead of SIGTERM', metavar='SIGNAL')
-	parser.add_option('-g', '--grace-period', dest='gracePeriod', type='float', default=None, help='Seconds to wait for the condition to be fulfilled', metavar='SECONDS')
+	parser.add_option('-g', '--grace-period', dest='gracePeriod', type='float', default=0, help='Seconds to wait for the condition to be fulfilled', metavar='SECONDS')
+	parser.add_option('--grace-interval', dest='graceInterval', type='float', default=1, help='Check every n seconds', metavar='SECONDS')
 	(opts, args) = parser.parse_args()
 
 	ports = map(int, args)
@@ -150,14 +151,19 @@ def main():
 	opts.killSignal = _signalByName(opts.killSignalStr)
 
 	try:
-		messages,errors = checkOnce(opts, ports)
-		if messages:
-			print('\n'.join(messages))
-		if errors and opts.gracePeriod is not None:
-			time.sleep(opts.gracePeriod)
+		gracePeriod = opts.gracePeriod
+		while True:
 			messages,errors = checkOnce(opts, ports)
 			if messages:
 				print('\n'.join(messages))
+			if not errors or gracePeriod <= 0:
+				break
+			if messages:
+				print('\n'.join(messages))
+
+			sleepTime = min(gracePeriod, opts.graceInterval)
+			time.sleep(sleepTime)
+			gracePeriod -= sleepTime
 		if errors:
 			print('\n'.join(errors))
 	except NoProcessException, ne:

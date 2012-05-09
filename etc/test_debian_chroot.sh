@@ -52,7 +52,7 @@ bin/test
 bin/supervisorctl shutdown>/dev/null
 python ./adhocracy.buildout/etc/test-port-free.py -g 10 --kill-pid 5001 $SUPERVISOR_PORTS
 bin/supervisord
-python ./adhocracy.buildout/etc/test-port-free.py -o -g 10 $SUPERVISOR_PORTS # Wait for supervisord to start
+python ./adhocracy.buildout/etc/test-port-free.py -o -g 30 $SUPERVISOR_PORTS # Wait for supervisord to start
 
 # Fail if not all services are marked as running
 if bin/supervisorctl status | grep -vq RUNNING; then
