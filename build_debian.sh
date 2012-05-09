@@ -86,7 +86,7 @@ if $use_postgres; then
 fi
 if $use_mysql; then
 	echo "mysql mysql-server/root_password string ${MYSQL_ROOTPW}" | $SUDO_CMD debconf-set-selections
-        echo "mysql mysql-server/root_password_again string ${MYSQL_ROOTPW}" | $SUDO_CMD debconf-set-selections
+	echo "mysql mysql-server/root_password_again string ${MYSQL_ROOTPW}" | $SUDO_CMD debconf-set-selections
 	$SUDO_CMD apt-get install -yqq mysql-server libmysqld-dev python-mysqldb
 	$SUDO_CMD sed -i "s%^bind-address.*%\#bind-address = 127.0.0.1\nskip-networking%" /etc/mysql/my.cnf
         $SUDO_CMD /etc/init.d/mysql restart
@@ -173,7 +173,7 @@ if $autostart; then
 	bin/supervisorctl status
 	python adhocracy.buildout/etc/test-port-free.py -o -g 10 ${SUPERVISOR_PORTS}
 	if bin/supervisorctl status | grep -vq RUNNING; then
-		echo "Failed to start all services!"
+		echo 'Failed to start all services!'
 		bin/supervisorctl status
 		exit 31
 	else
