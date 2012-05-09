@@ -181,6 +181,7 @@ if $autostart; then
 		echo
 		echo "Type  ./paster_interactive.sh  to run the interactive paster daemon."
 		echo "Then, navigate to  http://adhocracy.lan:5001/  to see adhocracy!"
+		echo "Use the username \"admin\" and password \"password\" to login."
 	fi
 fi
 
