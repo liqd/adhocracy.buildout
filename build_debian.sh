@@ -147,19 +147,8 @@ for f in adhocracy.buildout/*; do ln -sf $f; done
 bin/python bootstrap.py -c buildout_${buildout_variant}.cfg
 bin/buildout -Nc buildout_${buildout_variant}.cfg
 
-bin/paster setup-app etc/adhocracy.ini --name=content
-
 ln -sf adhocracy_buildout/adhocracy.buildout/etc/paster_interactive.sh "$ORIGINAL_PWD"
 ln -sf adhocracy_buildout/src/adhocracy "$ORIGINAL_PWD"
-
-# Setup system service
-if $setup_services; then
-	sed -e "s#%%USER%%#$USER#" -e "s#%%DIR%%#$(readlink -f .)#" \
-		<adhocracy.buildout/etc/init.d__adhocracy_services.sh.template | \
-		$SUDO_CMD tee /etc/init.d/adhocracy_services >/dev/null
-	$SUDO_CMD chmod a+x /etc/init.d/adhocracy_services
-	$SUDO_CMD update-rc.d adhocracy_services defaults
-fi
 
 # Set up DNS names
 if $modify_dns; then
@@ -179,21 +168,40 @@ else
 	fi
 fi
 
+# Setup system service
+if $setup_services; then
+	init_file=$(sed -e "s#%%USER%%#$USER#" -e "s#%%DIR%%#$(readlink -f .)#" \
+		adhocracy.buildout/etc/init.d__adhocracy_services.sh.template)
+	echo "$init_file" | $SUDO_CMD tee /etc/init.d/adhocracy_services >/dev/null
+	$SUDO_CMD chmod a+x /etc/init.d/adhocracy_services
+	$SUDO_CMD update-rc.d adhocracy_services defaults >/dev/null
+fi
+
 if $autostart; then
-	bin/supervisord
-	echo "Use adhocracy_buildout/bin/supervisorctl to control running services. Current status:"
-	bin/supervisorctl status
+	if $setup_service; then
+		$SUDO_CMD /etc/init.d/adhocracy_services start
+	else
+		bin/supervisord
+		echo "Use adhocracy_buildout/bin/supervisorctl to control running services."
+	fi
 	python adhocracy.buildout/etc/test-port-free.py -o -g 10 ${SUPERVISOR_PORTS}
 	if bin/supervisorctl status | grep -vq RUNNING; then
-		echo 'Failed to start all services!'
+		echo 'Failed to start all services:'
 		bin/supervisorctl status
 		exit 31
-	else
-		echo
-		echo
-		echo "Type  ./paster_interactive.sh  to run the interactive paster daemon."
-		echo "Then, navigate to  http://adhocracy.lan:5001/  to see adhocracy!"
-		echo "Use the username \"admin\" and password \"password\" to login."
 	fi
+
+	pasterOutput=$(bin/paster setup-app etc/adhocracy.ini --name=content)
+	if echo "$pasterOutput" | grep -q ERROR; then
+		echo "$pasterOutput"
+		echo 'Error in paster setup'
+		exit 32
+	fi
+
+	echo
+	echo
+	echo "Type  ./paster_interactive.sh  to run the interactive paster daemon."
+	echo "Then, navigate to  http://adhocracy.lan:5001/  to see adhocracy!"
+	echo "Use the username \"admin\" and password \"password\" to login."
 fi
 

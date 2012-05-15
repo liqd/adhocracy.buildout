@@ -61,6 +61,13 @@ if bin/supervisorctl status | grep -vq RUNNING; then
 	exit 31
 fi
 
+pasterOutput=\$(bin/paster setup-app etc/adhocracy.ini --name=content)
+if echo "\$pasterOutput" | grep -q ERROR; then
+       echo "\$pasterOutput"
+       echo 'Error in paster setup'
+       exit 32
+fi
+
 bin/paster serve etc/adhocracy.ini &
 paster_pid="\$!"
 
