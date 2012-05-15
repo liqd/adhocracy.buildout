@@ -18,7 +18,8 @@ OPTIONS:
    -D      Install a DNS server to answer *.adhocracy.lan
    -p      Use postgres (for automated performance/integration tests)
    -m      Use MySQL
-   -A      Do not start automatically
+   -A      Do not start now
+   -S      Do not configure system services
 EOF
 }
 
@@ -29,7 +30,8 @@ buildout_variant=development
 modify_dns=false
 developer_mode=false
 autostart=true
-while getopts dDpmA name
+setup_services=true
+while getopts dDpmAS name
 do
     case $name in
     d)    developer_mode=true;;
@@ -37,6 +39,7 @@ do
     p)    use_postgres=true;;
     m)    use_mysql=true;;
     A)    autostart=false;;
+    S)    setup_services=false;;
     ?)   usage
           exit 2;;
     esac
@@ -148,6 +151,15 @@ bin/paster setup-app etc/adhocracy.ini --name=content
 
 ln -sf adhocracy_buildout/adhocracy.buildout/etc/paster_interactive.sh "$ORIGINAL_PWD"
 ln -sf adhocracy_buildout/src/adhocracy "$ORIGINAL_PWD"
+
+# Setup system service
+if $setup_services; then
+	sed -e "s#%%USER#$USER#" -e "s#%%DIR#$(readlink -f .)#" \
+		<adhocracy.buildout/etc/init.d__adhocracy_services.sh.template | \
+		$SUDO_CMD tee /etc/init.d/adhocracy_services >/dev/null
+	$SUDO_CMD chmod a+x /etc/init.d/adhocracy_services
+	$SUDO_CMD update-rc.d adhocracy_services defaults
+fi
 
 # Set up DNS names
 if $modify_dns; then
