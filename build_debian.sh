@@ -154,7 +154,7 @@ ln -sf adhocracy_buildout/src/adhocracy "$ORIGINAL_PWD"
 
 # Setup system service
 if $setup_services; then
-	sed -e "s#%%USER#$USER#" -e "s#%%DIR#$(readlink -f .)#" \
+	sed -e "s#%%USER%%#$USER#" -e "s#%%DIR%%#$(readlink -f .)#" \
 		<adhocracy.buildout/etc/init.d__adhocracy_services.sh.template | \
 		$SUDO_CMD tee /etc/init.d/adhocracy_services >/dev/null
 	$SUDO_CMD chmod a+x /etc/init.d/adhocracy_services
