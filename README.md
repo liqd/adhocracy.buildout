@@ -17,11 +17,11 @@ It sets up a bunch of servers and configures supervisor to run them:
 Installation on debian or Ubuntu
 --------------------------------
 
-Simply run:
+On debian or Ubuntu, you can simply execute the following in a terminal:
 
-    $ wget -nv https://bitbucket.org/liqd/adhocracy.buildout/raw/tip/build_debian.sh -O build_debian.sh && sh build_debian.sh
+    wget -nv https://bitbucket.org/liqd/adhocracy.buildout/raw/tip/build_debian.sh -O build_debian.sh && sh build_debian.sh
 
-The script will use sudo to install the required dependencies, and install, set up, and start the required services.
+The script will use sudo to install the required dependencies, and install, set up, and start the required database services.
 
 Add the `-p` option to use PostgreSQL or the `-m` option to use MySQL instead of the default sqlite.
 
