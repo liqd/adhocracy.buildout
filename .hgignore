@@ -22,5 +22,6 @@ etc/adhocracy.ini
 etc/rabbitmq-env.conf
 etc/unthemed.ini
 etc/vhost.conf
+etc/adhocracy-interactive.ini
 mailsink
 
