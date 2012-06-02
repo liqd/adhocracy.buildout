@@ -1,0 +1,40 @@
+ 
+{% include etc/adhocracy.ini.in %}
+
+##############################################################
+#Custom OVERRIDES to install adhocracy on the productive server
+############################################################## 
+
+[app:content]
+
+adhocracy.solr.url = http://${parts.test_solr.host}:${parts.test_solr.port}/solr
+memcached.server = 127.0.0.1:${parts.ports.test_memcached}
+adhocracy.amqp.event_exchange = adhocracy.test.exchange
+cache_dir = ${parts.buildout.directory}/var/test/data
+beaker.cache.data_dir = ${parts.buildout.directory}/var/test/data/cache
+beaker.session.data_dir = ${parts.buildout.directory}/var/test/data/sessions
+beaker.session.cookie_domain = .${parts.domains.test_main} 
+session.domain =  .${parts.domains.test_main} 
+adhocracy.domain = ${parts.domains.test_main}
+adhocracy.protocol = http
+# by the "setup-app" paster command. 
+adhocracy.site.dir = ${parts.buildout.directory}/var/test/site
+email.from = mail@${parts.domains.test_main}
+
+sqlalchemy.url = sqlite:///%(here)s/test.db
+
+adhocracy.language = en_US
+
+# Add additional test specific configuration options as necessary.
+adhocracy.setup.drop = KILL_EM_ALL
+
+skip_migration = True
+skip_authentication = True
+skip_setupentities = True
+run_integrationtests = True
+
+[pipeline:default]
+pipeline = content
+
+[pipeline:wordpress_pipe]
+pipeline = _wordpress
