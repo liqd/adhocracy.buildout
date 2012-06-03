@@ -19,7 +19,7 @@ docs
 \.mr.developer.cfg
 \.installed.cfg
 etc/adhocracy.ini
-etc/rabbitmq-env.conf
+etc/redis.conf
 etc/unthemed.ini
 etc/vhost.conf
 etc/adhocracy-interactive.ini

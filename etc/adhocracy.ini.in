@@ -161,7 +161,6 @@ adhocracy.twitter.consumer_secret = ${parts.twitter.consumer_key}
 #adhocracy.bitly.login = 
 #adhocracy.bitly.key = 
 
-# INSTALL: the AMQP message queue, i.e. RabbitMQ. Make sure to use different 
 # queue and exchange names for each install of Adhocracy. Queue processing is 
 # unable to process messages related to another database. 
 adhocracy.amqp.host = 127.0.0.1
@@ -169,6 +168,10 @@ adhocracy.amqp.host = 127.0.0.1
 adhocracy.amqp.port = ${parts.ports.rabbitmq} 
 #adhocracy.amqp.event_queue = adhocracy.queue
 adhocracy.amqp.event_exchange = adhocracy.exchange
+
+adhocracy.redis.host = 127.0.0.1
+adhocracy.redis.port = ${parts.ports.redis}
+adhocracy.redis.name = ${parts.adhocracy.queue}
 
 # TODO: These are not currently evaluated. 
 #adhocracy.amqp.userid = 
