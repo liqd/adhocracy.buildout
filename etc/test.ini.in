@@ -9,7 +9,7 @@
 
 adhocracy.solr.url = http://${parts.test_solr.host}:${parts.test_solr.port}/solr
 memcached.server = 127.0.0.1:${parts.ports.test_memcached}
-adhocracy.amqp.event_exchange = adhocracy.test.exchange
+adhocracy.redis.port = ${parts.ports.test_redis}
 cache_dir = ${parts.buildout.directory}/var/test/data
 beaker.cache.data_dir = ${parts.buildout.directory}/var/test/data/cache
 beaker.session.data_dir = ${parts.buildout.directory}/var/test/data/sessions
