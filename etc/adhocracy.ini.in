@@ -161,9 +161,15 @@ adhocracy.twitter.consumer_secret = ${parts.twitter.consumer_key}
 #adhocracy.bitly.login = 
 #adhocracy.bitly.key = 
 
-adhocracy.redis.host = 127.0.0.1
+#
+# Redis is used to build a task queue that will be processed by the
+# `worker` process.
+# Note: host has to be an IP address, not a hostname
+#
+
+adhocracy.redis.host = ${parts.domains.redis}
 adhocracy.redis.port = ${parts.ports.redis}
-adhocracy.redis.name = ${parts.adhocracy.queue}
+adhocracy.redis.queue = ${parts.adhocracy.queue}
 
 # TODO: These are not currently evaluated. 
 #adhocracy.amqp.userid = 
