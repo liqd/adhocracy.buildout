@@ -2,6 +2,7 @@ var
 parts
 bin
 lib
+share
 eggs
 htmlcov
 include
