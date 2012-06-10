@@ -9,6 +9,7 @@ include
 downloads
 installed_eggs
 docs
+src
 .*\.orig$
 .*\.egg-info$
 .*\.pyo$
@@ -25,4 +26,3 @@ etc/unthemed.ini
 etc/vhost.conf
 etc/adhocracy-interactive.ini
 mailsink
-
