@@ -63,7 +63,21 @@ Run buildout with:
     $ bin/buildout -Nc buildout_development.cfg
 
 
-Run adhocracy with
+Additional steps in adhocracy geo branch
+----------------------------------------
+
+Make sure `src/adhocracy` is checked out in geo branch.
+
+In the adhocracy geo branch, you now have to initialize the local postgres
+database cluster with postgis, as described in
+`src/adhocracy/docs/initialize-postgis.rst'.
+
+In case you want to prefill the `region` table with Openstreetmap data, follow
+the docs in `src/adhocracy/docs/imposm-setup.txt`.
+
+
+Run adhocracy
+-------------
 
     # (Re)Run paster setup-app to set up or update the database
     # structure.
@@ -80,6 +94,7 @@ Run adhocracy with
 
     Start the adhocracy server in foreground mode:
     $ bin/paster serve etc/adhocracy.ini
+
 
 Buildout configuration
 ----------------------
