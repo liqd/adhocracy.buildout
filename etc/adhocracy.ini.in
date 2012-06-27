@@ -155,6 +155,10 @@ adhocracy.twitter.secret = ${parts.twitter.secret}
 adhocracy.twitter.consumer_key = ${parts.twitter.consumer_key} 
 adhocracy.twitter.consumer_secret = ${parts.twitter.consumer_key} 
 
+# INSTALL: Full path to a installation wide twitter profile which is used in
+# follow-us link, e.g. http://twitter.com/liqd_de
+adhocracy.twitter.profile_url = ${parts.twitter.profile_url}
+
 # INSTALL: bit.ly is used as a URL shortener. Since their API requires auth, you 
 # can either leave the defaults here and give certain usage statistics to the 
 # Adhocracy developers, or you can create an account at http://api.bit.ly
