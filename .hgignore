@@ -2,12 +2,14 @@ var
 parts
 bin
 lib
+share
 eggs
 htmlcov
 include
 downloads
 installed_eggs
 docs
+src
 .*\.orig$
 .*\.egg-info$
 .*\.pyo$
@@ -25,4 +27,3 @@ etc/vhost.conf
 etc/sysv-init
 etc/adhocracy-interactive.ini
 mailsink
-
