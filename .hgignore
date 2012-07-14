@@ -25,6 +25,7 @@ etc/unthemed.ini
 etc/test.ini
 etc/test.db
 etc/vhost.conf
+etc/sysv-init
 etc/adhocracy-interactive.ini
 mailsink
 
