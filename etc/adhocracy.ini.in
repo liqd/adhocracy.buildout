@@ -125,7 +125,7 @@ adhocracy.solr.url = http://${parts.solr.host}:${parts.solr.port}/solr
 {% python
 adhocracy_domain = parts['domains']['main']
 if parts['domains'].get('main.force_port', None):
-   adhocracy_domain += ':%s' % parts['ports']['main']
+   adhocracy_domain += ':%s' % parts['ports']['nginx']
 %}
 adhocracy.domain = ${adhocracy_domain}
 adhocracy.protocol = ${parts.adhocracy.protocol}
