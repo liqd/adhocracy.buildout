@@ -169,6 +169,7 @@ ln -sf adhocracy_buildout/src/adhocracy "$ORIGINAL_PWD"
 
 
 ####### nur sudo 2
+# hallo
 if ! $not_use_sudo_commands; then
 	# Set up DNS names
 	if $modify_dns; then
