@@ -20,6 +20,8 @@ OPTIONS:
    -m      Use MySQL
    -A      Do not start now
    -S      Do not configure system services
+   -s      Do not use sudo commands
+   -u      Do not use user commands
 EOF
 }
 
@@ -31,6 +33,8 @@ modify_dns=false
 developer_mode=false
 autostart=true
 setup_services=true
+not_use_sudo_commads=false
+not_use_user_commads=false
 while getopts dDpmAS name
 do
     case $name in
@@ -40,7 +44,9 @@ do
     m)    use_mysql=true;;
     A)    autostart=false;;
     S)    setup_services=false;;
-    ?)   usage
+    s)    not_use_sudo_commads=true;;
+    u)    not_use_user_commads=true;;
+    ?)    usage
           exit 2;;
     esac
 done
@@ -59,16 +65,6 @@ else
 	buildout_variant=development
 fi
 
-
-SUDO_CMD=sudo
-if [ "$(id -u)" -eq 0 ]; then
-	SUDO_CMD=
-fi
-if ! $SUDO_CMD true ; then
-	echo 'sudo failed. Is it installed and configured?'
-	exit 20
-fi
-
 if ! mkdir -p adhocracy_buildout; then
 	echo 'Cannot create adhocracy_buildout directory. Please change to a directory where you can create files.'
 	exit 21
@@ -79,44 +75,64 @@ if [ '!' -w adhocracy_buildout ]; then
 	exit 22
 fi
 
-$SUDO_CMD apt-get install -yqq libpng-dev libjpeg-dev gcc make build-essential bin86 unzip libpcre3-dev zlib1g-dev mercurial python python-virtualenv python-dev libsqlite3-dev openjdk-6-jre erlang-dev erlang-mnesia erlang-os-mon xsltproc libapache2-mod-proxy-html libpq-dev
+########### nur sudo
+if ! $not_use_sudo_commands; then
 
-# Not strictly required, but needed to push to bitbucket via ssh
-$SUDO_CMD apt-get install -yqq openssh-client
-
-if $use_postgres; then
-	$SUDO_CMD apt-get install -yqq postgresql-8.4 postgresql-server-dev-8.4 postgresql-8.4-postgis
-fi
-if $use_mysql; then
-	echo "mysql mysql-server/root_password string ${MYSQL_ROOTPW}" | $SUDO_CMD debconf-set-selections
-	echo "mysql mysql-server/root_password_again string ${MYSQL_ROOTPW}" | $SUDO_CMD debconf-set-selections
-	$SUDO_CMD apt-get install -yqq mysql-server libmysqld-dev python-mysqldb
-	$SUDO_CMD sed -i "s%^bind-address.*%\#bind-address = 127.0.0.1\nskip-networking%" /etc/mysql/my.cnf
-        $SUDO_CMD /etc/init.d/mysql restart
-fi
-$SUDO_CMD a2enmod proxy proxy_http proxy_html >/dev/null
-
-if $use_postgres; then
-	# Set up postgreSQL
-	# Since we're using postgreSQL 8.4 which doesn't have CREATE USER IF NOT EXISTS, we're using the following hack ...
-	echo "DROP ROLE IF EXISTS adhocracy; CREATE USER adhocracy PASSWORD 'adhoc';" | $SUDO_CMD su postgres -c 'psql'
-	$SUDO_CMD su postgres -c 'createdb adhocracy --owner adhocracy;' || true
-	if $install_geo; then
-		$SUDO_CMD su postgres -c '
-			createlang plpgsql adhocracy;
-			psql -d adhocracy -f /usr/share/postgresql/8.4/contrib/postgis-1.5/postgis.sql  >/dev/null 2>&1;
-			psql -d adhocracy -f /usr/share/postgresql/8.4/contrib/postgis-1.5/spatial_ref_sys.sql  >/dev/null 2>&1;
-			psql -d adhocracy -f /usr/share/postgresql/8.4/contrib/postgis_comments.sql >/dev/null 2>&1;'
+	SUDO_CMD=sudo
+	if [ "$(id -u)" -eq 0 ]; then
+		SUDO_CMD=
 	fi
-fi
+	if ! $SUDO_CMD true ; then
+		echo 'sudo failed. Is it installed and configured?'
+		exit 20
+	fi
 
-if $use_mysql; then
+	$SUDO_CMD apt-get install -yqq libpng-dev libjpeg-dev gcc make build-essential bin86 unzip libpcre3-dev zlib1g-dev mercurial python python-virtualenv python-dev libsqlite3-dev openjdk-6-jre erlang-dev erlang-mnesia erlang-os-mon xsltproc libapache2-mod-proxy-html libpq-dev
+	# Not strictly required, but needed to push to bitbucket via ssh
+	$SUDO_CMD apt-get install -yqq openssh-client
+	
+	
+	if $use_postgres; then
+		$SUDO_CMD apt-get install -yqq postgresql-8.4 postgresql-server-dev-8.4 postgresql-8.4-postgis
+	fi
+	if $use_mysql; then
+		echo "mysql mysql-server/root_password string ${MYSQL_ROOTPW}" | $SUDO_CMD debconf-set-selections
+		echo "mysql mysql-server/root_password_again string ${MYSQL_ROOTPW}" | $SUDO_CMD debconf-set-selections
+		$SUDO_CMD apt-get install -yqq mysql-server libmysqld-dev python-mysqldb
+		$SUDO_CMD sed -i "s%^bind-address.*%\#bind-address = 127.0.0.1\nskip-networking%" /etc/mysql/my.cnf
+		$SUDO_CMD /etc/init.d/mysql restart
+	fi
+	$SUDO_CMD a2enmod proxy proxy_http proxy_html >/dev/null
+
+	if $use_postgres; then
+		# Set up postgreSQL
+		# Since we're using postgreSQL 8.4 which doesn't have CREATE USER IF NOT EXISTS, we're using the following hack ...
+		echo "DROP ROLE IF EXISTS adhocracy; CREATE USER adhocracy PASSWORD 'adhoc';" | $SUDO_CMD su postgres -c 'psql'
+		$SUDO_CMD su postgres -c 'createdb adhocracy --owner adhocracy;' || true
+		if $install_geo; then
+			$SUDO_CMD su postgres -c '
+				createlang plpgsql adhocracy;
+				psql -d adhocracy -f /usr/share/postgresql/8.4/contrib/postgis-1.5/postgis.sql  >/dev/null 2>&1;
+				psql -d adhocracy -f /usr/share/postgresql/8.4/contrib/postgis-1.5/spatial_ref_sys.sql  >/dev/null 2>&1;
+				psql -d adhocracy -f /usr/share/postgresql/8.4/contrib/postgis_comments.sql >/dev/null 2>&1;'
+		fi
+	fi
+	
+	if $use_mysql; then
 	echo "CREATE DATABASE IF NOT EXISTS adhocracy; \
               GRANT ALL PRIVILEGES ON adhocracy . * TO 'adhocracy'@'localhost' IDENTIFIED BY 'adhoc'; \
               FLUSH PRIVILEGES;" \
           | mysql --user root --password=${MYSQL_ROOTPW}
 
+	fi
+	
 fi
+
+
+############## nur sudo ende
+
+
+
 
 if [ -x adhocracy_buildout/bin/supervisorctl ]; then
 	adhocracy_buildout/bin/supervisorctl shutdown >/dev/null
@@ -150,36 +166,46 @@ bin/buildout -Nc buildout_${buildout_variant}.cfg
 ln -sf adhocracy_buildout/adhocracy.buildout/etc/paster_interactive.sh "$ORIGINAL_PWD"
 ln -sf adhocracy_buildout/src/adhocracy "$ORIGINAL_PWD"
 
-# Set up DNS names
-if $modify_dns; then
-	$SUDO_CMD apt-get install -qqy dnsmasq
-	/bin/echo -e 'address=/.adhocracy.lan/127.0.0.1\nresolv-file=/etc/dnsmasq.resolv.conf' | $SUDO_CMD tee /etc/dnsmasq.d/adhocracy.lan.conf >/dev/null
-	/bin/echo -e 'nameserver 8.8.8.8\nnameserver 8.8.4.4\n' | $SUDO_CMD tee /etc/dnsmasq.resolv.conf >/dev/null
-	$SUDO_CMD sed -i 's/^#IGNORE_RESOLVCONF=yes$/IGNORE_RESOLVCONF=yes/' /etc/default/dnsmasq >/dev/null
-	# This is hack-ish, but it works no matter how exotic the configuration is
-	if $SUDO_CMD test -w /etc/resolv.conf; then
-		echo 'nameserver 127.0.0.1' | $SUDO_CMD tee /etc/resolv.conf >/dev/null
-		$SUDO_CMD chattr +i /etc/resolv.conf
+
+
+####### nur sudo 2
+if ! $not_use_sudo_commands; then
+	# Set up DNS names
+	if $modify_dns; then
+		$SUDO_CMD apt-get install -qqy dnsmasq
+		/bin/echo -e 'address=/.adhocracy.lan/127.0.0.1\nresolv-file=/etc/dnsmasq.resolv.conf' | $SUDO_CMD tee /etc/dnsmasq.d/adhocracy.lan.conf >/dev/null
+		/bin/echo -e 'nameserver 8.8.8.8\nnameserver 8.8.4.4\n' | $SUDO_CMD tee /etc/dnsmasq.resolv.conf >/dev/null
+		$SUDO_CMD sed -i 's/^#IGNORE_RESOLVCONF=yes$/IGNORE_RESOLVCONF=yes/' /etc/default/dnsmasq >/dev/null
+		# This is hack-ish, but it works no matter how exotic the configuration is
+		if $SUDO_CMD test -w /etc/resolv.conf; then
+			echo 'nameserver 127.0.0.1' | $SUDO_CMD tee /etc/resolv.conf >/dev/null
+			$SUDO_CMD chattr +i /etc/resolv.conf
+		fi
+		$SUDO_CMD /etc/init.d/dnsmasq restart
+	else
+		if ! grep -q adhocracy.lan /etc/hosts; then
+			$SUDO_CMD sh -c 'echo 127.0.0.1 adhocracy.lan test.adhocracy.lan >> /etc/hosts'
+		fi
 	fi
-	$SUDO_CMD /etc/init.d/dnsmasq restart
-else
-	if ! grep -q adhocracy.lan /etc/hosts; then
-		$SUDO_CMD sh -c 'echo 127.0.0.1 adhocracy.lan test.adhocracy.lan >> /etc/hosts'
+	# Setup system service
+	if $setup_services; then
+		init_file=$(sed -e "s#%%USER%%#$USER#" -e "s#%%DIR%%#$(readlink -f .)#" \
+			adhocracy.buildout/etc/init.d__adhocracy_services.sh.template)
+		echo "$init_file" | $SUDO_CMD tee /etc/init.d/adhocracy_services >/dev/null
+		$SUDO_CMD chmod a+x /etc/init.d/adhocracy_services
+		$SUDO_CMD update-rc.d adhocracy_services defaults >/dev/null
 	fi
+
 fi
 
-# Setup system service
-if $setup_services; then
-	init_file=$(sed -e "s#%%USER%%#$USER#" -e "s#%%DIR%%#$(readlink -f .)#" \
-		adhocracy.buildout/etc/init.d__adhocracy_services.sh.template)
-	echo "$init_file" | $SUDO_CMD tee /etc/init.d/adhocracy_services >/dev/null
-	$SUDO_CMD chmod a+x /etc/init.d/adhocracy_services
-	$SUDO_CMD update-rc.d adhocracy_services defaults >/dev/null
-fi
+
+############ nur sudo2 ende
 
 if $autostart; then
 	if $setup_service; then
-		$SUDO_CMD /etc/init.d/adhocracy_services start
+		if ! $not_use_sudo_commands; then
+			$SUDO_CMD /etc/init.d/adhocracy_services start
+		fi
 	else
 		bin/supervisord
 		echo "Use adhocracy_buildout/bin/supervisorctl to control running services."
