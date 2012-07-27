@@ -195,6 +195,8 @@ adhocracy.cache_tiles = True
 piwik.site = 
 piwik.id = 
 
+adhocracy.hide_instance_list_in_navigation = False
+
 # useful in settings where users can create instances
 adhocracy.show_instance_creators = False
 
