@@ -195,6 +195,9 @@ adhocracy.cache_tiles = True
 piwik.site = 
 piwik.id = 
 
+# useful in settings where users can create instances
+adhocracy.show_instance_creators = False
+
 # Logging configuration
 [loggers]
 keys = root, adhocracy, sqlalchemy
