@@ -33,9 +33,10 @@ modify_dns=false
 developer_mode=false
 autostart=true
 setup_services=true
-not_use_sudo_commads=false
-not_use_user_commads=false
-while getopts dDpmAS name
+not_use_sudo_commands=false
+not_use_user_commands=false
+
+while getopts dDpmASsu name
 do
     case $name in
     d)    developer_mode=true;;
@@ -44,12 +45,20 @@ do
     m)    use_mysql=true;;
     A)    autostart=false;;
     S)    setup_services=false;;
-    s)    not_use_sudo_commads=true;;
-    u)    not_use_user_commads=true;;
+    s)    not_use_sudo_commands=true;;
+    u)    not_use_user_commands=true;;
     ?)    usage
           exit 2;;
     esac
 done
+
+if $not_use_sudo_commands; then
+	echo '****** NO SUDO COMMANDS ******'
+fi
+
+if $not_use_user_commands; then
+	echo '****** NO USER COMMANDS ******'
+fi
 
 if $use_postgres && $use_mysql; then
 	echo 'Cannot use Postgres AND MySQL.'
