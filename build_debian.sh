@@ -118,6 +118,8 @@ if ! $not_use_sudo_commands; then
 		fi
 	fi
 	
+	# This is only executed when sudo-commands are enabled since mysql will only
+	# install with sudo-commands.
 	if $use_mysql; then
 	echo "CREATE DATABASE IF NOT EXISTS adhocracy; \
               GRANT ALL PRIVILEGES ON adhocracy . * TO 'adhocracy'@'localhost' IDENTIFIED BY 'adhoc'; \
@@ -169,7 +171,6 @@ ln -sf adhocracy_buildout/src/adhocracy "$ORIGINAL_PWD"
 
 
 ####### nur sudo 2
-# hallo
 if ! $not_use_sudo_commands; then
 	# Set up DNS names
 	if $modify_dns; then
@@ -211,24 +212,28 @@ if $autostart; then
 		bin/supervisord
 		echo "Use adhocracy_buildout/bin/supervisorctl to control running services."
 	fi
-	python adhocracy.buildout/etc/test-port-free.py -o -g 10 ${SUPERVISOR_PORTS}
-	if bin/supervisorctl status | grep -vq RUNNING; then
-		echo 'Failed to start all services:'
-		bin/supervisorctl status
-		exit 31
-	fi
+	
+	#
+	if ! $not_use_user_commands; then
+		python adhocracy.buildout/etc/test-port-free.py -o -g 10 ${SUPERVISOR_PORTS}
+		if bin/supervisorctl status | grep -vq RUNNING; then
+			echo 'Failed to start all services:'
+			bin/supervisorctl status
+			exit 31
+		fi
 
-	pasterOutput=$(bin/paster setup-app etc/adhocracy.ini --name=content)
-	if echo "$pasterOutput" | grep -q ERROR; then
-		echo "$pasterOutput"
-		echo 'Error in paster setup'
-		exit 32
-	fi
+		pasterOutput=$(bin/paster setup-app etc/adhocracy.ini --name=content)
+		if echo "$pasterOutput" | grep -q ERROR; then
+			echo "$pasterOutput"
+			echo 'Error in paster setup'
+			exit 32
+		fi
 
-	echo
-	echo
-	echo "Type  ./paster_interactive.sh  to run the interactive paster daemon."
-	echo "Then, navigate to  http://adhocracy.lan:5001/  to see adhocracy!"
-	echo "Use the username \"admin\" and password \"password\" to login."
+		echo
+		echo
+		echo "Type  ./paster_interactive.sh  to run the interactive paster daemon."
+		echo "Then, navigate to  http://adhocracy.lan:5001/  to see adhocracy!"
+		echo "Use the username \"admin\" and password \"password\" to login."
+	fi
 fi
 
