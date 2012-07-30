@@ -1,6 +1,7 @@
 #!/bin/sh
 
 BUILDOUT_URL=https://bitbucket.org/liqd/adhocracy.buildout
+SERVICE_TEMPLATE=https://bitbucket.org/liqd/adhocracy.buildout/raw/46fcef386019/etc/init.d__adhocracy_services.sh.template
 SUPERVISOR_PORTS="5005 5006 5010"
 PORTS="5001 ${SUPERVISOR_PORTS}"
 
@@ -74,11 +75,13 @@ else
 	buildout_variant=development
 fi
 
+# Create buildout directory
 if ! mkdir -p adhocracy_buildout; then
 	echo 'Cannot create adhocracy_buildout directory. Please change to a directory where you can create files.'
 	exit 21
 fi
 
+# Directory buildout was not created
 if [ '!' -w adhocracy_buildout ]; then
 	echo 'Cannot write to adhocracy_buildout directory. Change to another directory, remove adhocracy_buildout, or run as another user'
 	exit 22
@@ -144,39 +147,42 @@ fi
 
 
 
+# NUR USER
+if ! $not_use_user_commands; then
 
-if [ -x adhocracy_buildout/bin/supervisorctl ]; then
-	adhocracy_buildout/bin/supervisorctl shutdown >/dev/null
+	if [ -x adhocracy_buildout/bin/supervisorctl ]; then
+		adhocracy_buildout/bin/supervisorctl shutdown >/dev/null
+	fi
+
+	test_port_free_tmp=$(mktemp)
+	if [ '!' -e ./test-port-free.py ]; then
+		wget -q $BUILDOUT_URL/raw/default/etc/test-port-free.py -O $test_port_free_tmp
+	fi
+	python $test_port_free_tmp -g 10 --kill-pid $PORTS
+	rm -f $test_port_free_tmp
+
+
+	virtualenv --distribute --no-site-packages adhocracy_buildout
+	ORIGINAL_PWD=$(pwd)
+	cd adhocracy_buildout
+	if [ -e adhocracy.buildout ]; then
+		hg pull --quiet -u -R adhocracy.buildout
+	else
+		hg clone --quiet $BUILDOUT_URL adhocracy.buildout
+	fi
+
+	for f in adhocracy.buildout/*; do ln -sf $f; done
+
+
+	. bin/activate
+
+	bin/python bootstrap.py -c buildout_${buildout_variant}.cfg
+	bin/buildout -Nc buildout_${buildout_variant}.cfg
+
+	ln -sf adhocracy_buildout/adhocracy.buildout/etc/paster_interactive.sh "$ORIGINAL_PWD"
+	ln -sf adhocracy_buildout/src/adhocracy "$ORIGINAL_PWD"
+
 fi
-
-test_port_free_tmp=$(mktemp)
-if [ '!' -e ./test-port-free.py ]; then
-	wget -q $BUILDOUT_URL/raw/default/etc/test-port-free.py -O $test_port_free_tmp
-fi
-python $test_port_free_tmp -g 10 --kill-pid $PORTS
-rm -f $test_port_free_tmp
-
-
-virtualenv --distribute --no-site-packages adhocracy_buildout
-ORIGINAL_PWD=$(pwd)
-cd adhocracy_buildout
-if [ -e adhocracy.buildout ]; then
-	hg pull --quiet -u -R adhocracy.buildout
-else
-	hg clone --quiet $BUILDOUT_URL adhocracy.buildout
-fi
-
-for f in adhocracy.buildout/*; do ln -sf $f; done
-
-
-. bin/activate
-
-bin/python bootstrap.py -c buildout_${buildout_variant}.cfg
-bin/buildout -Nc buildout_${buildout_variant}.cfg
-
-ln -sf adhocracy_buildout/adhocracy.buildout/etc/paster_interactive.sh "$ORIGINAL_PWD"
-ln -sf adhocracy_buildout/src/adhocracy "$ORIGINAL_PWD"
-
 
 
 ####### nur sudo 2
@@ -200,13 +206,20 @@ if ! $not_use_sudo_commands; then
 	fi
 	# Setup system service
 	if $setup_services; then
-		init_file=$(sed -e "s#%%USER%%#$USER#" -e "s#%%DIR%%#$(readlink -f .)#" \
-			adhocracy.buildout/etc/init.d__adhocracy_services.sh.template)
+	
+		# Download the temp file into tmp
+		wget $SERVICE_TEMPLATE -O /tmp/tmp_init.d__adhocracy_services.sh.template
+		
+		
+		init_file=$(sed -e "s#%%USER%%#$USER#" -e "s#%%DIR%%#$(readlink -f .)#" /tmp/tmp_init.d__adhocracy_services.sh.template)
+		
+		# Remove the tmp file
+		rm /tmp/tmp_init.d__adhocracy_services.sh.template
+		
 		echo "$init_file" | $SUDO_CMD tee /etc/init.d/adhocracy_services >/dev/null
 		$SUDO_CMD chmod a+x /etc/init.d/adhocracy_services
 		$SUDO_CMD update-rc.d adhocracy_services defaults >/dev/null
 	fi
-
 fi
 
 
@@ -215,7 +228,8 @@ fi
 if $autostart; then
 	if $setup_service; then
 		if ! $not_use_sudo_commands; then
-			$SUDO_CMD /etc/init.d/adhocracy_services start
+			#/etc/init.d/adhocracy_services start
+			echo "Start adhocracy service here"
 		fi
 	else
 		bin/supervisord
