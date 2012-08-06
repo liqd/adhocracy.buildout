@@ -1,7 +1,9 @@
 #!/bin/sh
 
-BUILDOUT_URL=https://bitbucket.org/liqd/adhocracy.buildout
-SERVICE_TEMPLATE=https://bitbucket.org/liqd/adhocracy.buildout/raw/46fcef386019/etc/init.d__adhocracy_services.sh.template
+#BUILDOUT_URL=https://bitbucket.org/liqd/adhocracy.buildout
+#SERVICE_TEMPLATE=https://bitbucket.org/liqd/adhocracy.buildout/raw/46fcef386019/etc/init.d__adhocracy_services.sh.template
+BUILDOUT_URL=https://bitbucket.org/chrisprobst/adhocracy.buildout
+SERVICE_TEMPLATE=https://bitbucket.org/chrisprobst/adhocracy.buildout/raw/53f49791d566/etc/init.d__adhocracy_services.sh.template
 SUPERVISOR_PORTS="5005 5006 5010"
 PORTS="5001 ${SUPERVISOR_PORTS}"
 
