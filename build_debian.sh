@@ -75,18 +75,6 @@ else
 	buildout_variant=development
 fi
 
-# Create buildout directory
-if ! mkdir -p adhocracy_buildout; then
-	echo 'Cannot create adhocracy_buildout directory. Please change to a directory where you can create files.'
-	exit 21
-fi
-
-# Directory buildout was not created
-if [ '!' -w adhocracy_buildout ]; then
-	echo 'Cannot write to adhocracy_buildout directory. Change to another directory, remove adhocracy_buildout, or run as another user'
-	exit 22
-fi
-
 ########### nur sudo
 if ! $not_use_sudo_commands; then
 
@@ -149,7 +137,17 @@ fi
 
 # NUR USER
 if ! $not_use_user_commands; then
+	# Create buildout directory
+	if ! mkdir -p adhocracy_buildout; then
+		echo 'Cannot create adhocracy_buildout directory. Please change to a directory where you can create files.'
+		exit 21
+	fi
 
+	# Directory buildout was not created
+	if [ '!' -w adhocracy_buildout ]; then
+		echo 'Cannot write to adhocracy_buildout directory. Change to another directory, remove adhocracy_buildout, or run as another user'
+		exit 22
+	fi
 	if [ -x adhocracy_buildout/bin/supervisorctl ]; then
 		adhocracy_buildout/bin/supervisorctl shutdown >/dev/null
 	fi
