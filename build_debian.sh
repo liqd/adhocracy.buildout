@@ -2,7 +2,7 @@
 
 BUILDOUT_URL=https://bitbucket.org/liqd/adhocracy.buildout
 SUPERVISOR_PORTS="5005 5006 5010"
-PORTS="5001 ${SUPERVISOR_PORTS}"
+ADHOCRACY_PORT=5001
 
 set -e
 
@@ -124,9 +124,13 @@ fi
 
 test_port_free_tmp=$(mktemp)
 if [ '!' -e ./test-port-free.py ]; then
-	wget -q $BUILDOUT_URL/raw/default/etc/test-port-free.py -O $test_port_free_tmp
+	if ! wget -q $BUILDOUT_URL/raw/default/etc/test-port-free.py -O $test_port_free_tmp; then
+        ex=$?
+        echo "Download failed. Are you connected to the Internet?"
+        exit $ex
+    fi
 fi
-python $test_port_free_tmp -g 10 --kill-pid $PORTS
+python $test_port_free_tmp -g 10 --kill-pid $ADHOCRACY_PORT $SUPERVISOR_PORTS
 rm -f $test_port_free_tmp
 
 
@@ -201,7 +205,7 @@ if $autostart; then
 	echo
 	echo
 	echo "Type  ./paster_interactive.sh  to run the interactive paster daemon."
-	echo "Then, navigate to  http://adhocracy.lan:5001/  to see adhocracy!"
+	echo "Then, navigate to  http://adhocracy.lan:${ADHOCRACY_PORT}/  to see adhocracy!"
 	echo "Use the username \"admin\" and password \"password\" to login."
 fi
 
