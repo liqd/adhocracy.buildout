@@ -55,6 +55,11 @@ do
     esac
 done
 
+if $not_use_sudo_commands && $autostart && $setup_services; then
+	echo 'ERROR: You can\'t setup services without sudo!'
+	exit 33
+fi
+
 if $not_use_sudo_commands; then
 	echo '****** NO SUDO COMMANDS ******'
 fi
@@ -150,24 +155,15 @@ if ! $not_use_sudo_commands; then
 	
 	# Setup system service
 	if $setup_services; then
-	
-		# Download the temp file into tmp
-		wget $SERVICE_TEMPLATE -O /tmp/tmp_init.d__adhocracy_services.sh.template
-		
-		
-		init_file=$(sed -e "s#%%USER%%#$USER#" -e "s#%%DIR%%#$(readlink -f .)#" /tmp/tmp_init.d__adhocracy_services.sh.template)
-		
-		# Remove the tmp file
-		rm /tmp/tmp_init.d__adhocracy_services.sh.template
-		
-		echo "$init_file" | $SUDO_CMD tee /etc/init.d/adhocracy_services >/dev/null
+		wget $SERVICE_TEMPLATE -O- -nv | \
+			sed -e "s#%%USER%%#$USER#" -e "s#%%DIR%%#$(readlink -f .)#" | \
+			$SUDO_CMD tee /etc/init.d/adhocracy_services >/dev/null
+
 		$SUDO_CMD chmod a+x /etc/init.d/adhocracy_services
 		$SUDO_CMD update-rc.d adhocracy_services defaults >/dev/null
 	fi
 	
 fi
-
-
 ############## nur sudo ende
 
 
@@ -222,21 +218,14 @@ fi
 
 
 
-
-############ nur sudo2 ende
-
 if $autostart; then
 	if $setup_service; then
-		if ! $not_use_sudo_commands; then
-			#/etc/init.d/adhocracy_services start
-			echo "Start adhocracy service here"
-		fi
+			$SUDO_CMD /etc/init.d/adhocracy_services start
 	else
 		bin/supervisord
 		echo "Use adhocracy_buildout/bin/supervisorctl to control running services."
 	fi
 	
-	#
 	if ! $not_use_user_commands; then
 		python adhocracy.buildout/etc/test-port-free.py -o -g 10 ${SUPERVISOR_PORTS}
 		if bin/supervisorctl status | grep -vq RUNNING; then
