@@ -130,6 +130,23 @@ if ! $not_use_sudo_commands; then
 
 	fi
 	
+	# Set up DNS names
+	if $modify_dns; then
+		$SUDO_CMD apt-get install -qqy dnsmasq
+		/bin/echo -e 'address=/.adhocracy.lan/127.0.0.1\nresolv-file=/etc/dnsmasq.resolv.conf' | $SUDO_CMD tee /etc/dnsmasq.d/adhocracy.lan.conf >/dev/null
+		/bin/echo -e 'nameserver 8.8.8.8\nnameserver 8.8.4.4\n' | $SUDO_CMD tee /etc/dnsmasq.resolv.conf >/dev/null
+		$SUDO_CMD sed -i 's/^#IGNORE_RESOLVCONF=yes$/IGNORE_RESOLVCONF=yes/' /etc/default/dnsmasq >/dev/null
+		# This is hack-ish, but it works no matter how exotic the configuration is
+		if $SUDO_CMD test -w /etc/resolv.conf; then
+			echo 'nameserver 127.0.0.1' | $SUDO_CMD tee /etc/resolv.conf >/dev/null
+			$SUDO_CMD chattr +i /etc/resolv.conf
+		fi
+		$SUDO_CMD /etc/init.d/dnsmasq restart
+	else
+		if ! grep -q adhocracy.lan /etc/hosts; then
+			$SUDO_CMD sh -c 'echo 127.0.0.1 adhocracy.lan test.adhocracy.lan >> /etc/hosts'
+		fi
+	fi
 fi
 
 
@@ -187,23 +204,6 @@ fi
 
 ####### nur sudo 2
 if ! $not_use_sudo_commands; then
-	# Set up DNS names
-	if $modify_dns; then
-		$SUDO_CMD apt-get install -qqy dnsmasq
-		/bin/echo -e 'address=/.adhocracy.lan/127.0.0.1\nresolv-file=/etc/dnsmasq.resolv.conf' | $SUDO_CMD tee /etc/dnsmasq.d/adhocracy.lan.conf >/dev/null
-		/bin/echo -e 'nameserver 8.8.8.8\nnameserver 8.8.4.4\n' | $SUDO_CMD tee /etc/dnsmasq.resolv.conf >/dev/null
-		$SUDO_CMD sed -i 's/^#IGNORE_RESOLVCONF=yes$/IGNORE_RESOLVCONF=yes/' /etc/default/dnsmasq >/dev/null
-		# This is hack-ish, but it works no matter how exotic the configuration is
-		if $SUDO_CMD test -w /etc/resolv.conf; then
-			echo 'nameserver 127.0.0.1' | $SUDO_CMD tee /etc/resolv.conf >/dev/null
-			$SUDO_CMD chattr +i /etc/resolv.conf
-		fi
-		$SUDO_CMD /etc/init.d/dnsmasq restart
-	else
-		if ! grep -q adhocracy.lan /etc/hosts; then
-			$SUDO_CMD sh -c 'echo 127.0.0.1 adhocracy.lan test.adhocracy.lan >> /etc/hosts'
-		fi
-	fi
 	# Setup system service
 	if $setup_services; then
 	
