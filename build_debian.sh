@@ -147,6 +147,24 @@ if ! $not_use_sudo_commands; then
 			$SUDO_CMD sh -c 'echo 127.0.0.1 adhocracy.lan test.adhocracy.lan >> /etc/hosts'
 		fi
 	fi
+	
+	# Setup system service
+	if $setup_services; then
+	
+		# Download the temp file into tmp
+		wget $SERVICE_TEMPLATE -O /tmp/tmp_init.d__adhocracy_services.sh.template
+		
+		
+		init_file=$(sed -e "s#%%USER%%#$USER#" -e "s#%%DIR%%#$(readlink -f .)#" /tmp/tmp_init.d__adhocracy_services.sh.template)
+		
+		# Remove the tmp file
+		rm /tmp/tmp_init.d__adhocracy_services.sh.template
+		
+		echo "$init_file" | $SUDO_CMD tee /etc/init.d/adhocracy_services >/dev/null
+		$SUDO_CMD chmod a+x /etc/init.d/adhocracy_services
+		$SUDO_CMD update-rc.d adhocracy_services defaults >/dev/null
+	fi
+	
 fi
 
 
@@ -200,27 +218,9 @@ if ! $not_use_user_commands; then
 	ln -sf adhocracy_buildout/src/adhocracy "$ORIGINAL_PWD"
 
 fi
+#NUR USER ENDE
 
 
-####### nur sudo 2
-if ! $not_use_sudo_commands; then
-	# Setup system service
-	if $setup_services; then
-	
-		# Download the temp file into tmp
-		wget $SERVICE_TEMPLATE -O /tmp/tmp_init.d__adhocracy_services.sh.template
-		
-		
-		init_file=$(sed -e "s#%%USER%%#$USER#" -e "s#%%DIR%%#$(readlink -f .)#" /tmp/tmp_init.d__adhocracy_services.sh.template)
-		
-		# Remove the tmp file
-		rm /tmp/tmp_init.d__adhocracy_services.sh.template
-		
-		echo "$init_file" | $SUDO_CMD tee /etc/init.d/adhocracy_services >/dev/null
-		$SUDO_CMD chmod a+x /etc/init.d/adhocracy_services
-		$SUDO_CMD update-rc.d adhocracy_services defaults >/dev/null
-	fi
-fi
 
 
 ############ nur sudo2 ende
