@@ -23,6 +23,7 @@ OPTIONS:
    -S      Do not configure system services
    -s      Do not use sudo commands
    -u      Do not use user commands
+   -U	   Set the adhocracy user if you are running as root
 EOF
 }
 
@@ -36,8 +37,13 @@ autostart=true
 setup_services=true
 not_use_sudo_commands=false
 not_use_user_commands=false
+adhoc_user=$USER
 
-while getopts dDpmASsu name
+if [ -n "$SUDO_USER" ]; then
+	adhoc_user=$SUDO_USER
+fi
+
+while getopts dDpmASsuU: name
 do
     case $name in
     d)    developer_mode=true;;
@@ -48,6 +54,7 @@ do
     S)    setup_services=false;;
     s)    not_use_sudo_commands=true;;
     u)    not_use_user_commands=true;;
+    U)	  adhoc_user=$OPTARG;;
     ?)    usage
           exit 2;;
     esac
@@ -138,9 +145,13 @@ if ! $not_use_sudo_commands; then
 	fi
 
 	if $setup_services; then
-
+		if [ "$adhoc_user" = "root" ]; then
+			echo "You are root. Please use the -U flag to set the user adhocracy should be running as"
+			exit 35
+		fi
+	
 		wget $SERVICE_TEMPLATE -O- -nv | \
-			sed -e "s#%%USER%%#$USER#" -e "s#%%DIR%%#$(readlink -f .)/adhocracy_buildout#" | \
+			sed -e "s#%%USER%%#$adhoc_user#" -e "s#%%DIR%%#$(readlink -f .)/adhocracy_buildout#" | \
 			$SUDO_CMD tee /etc/init.d/adhocracy_services >/dev/null
 
 		$SUDO_CMD chmod a+x /etc/init.d/adhocracy_services
