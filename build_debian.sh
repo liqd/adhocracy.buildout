@@ -55,6 +55,35 @@ do
     esac
 done
 
+
+if $autostart; then
+	
+	adhocracy_buildout/bin/supervisord
+	echo "Use adhocracy_buildout/bin/supervisorctl to control running services."
+	
+
+	python adhocracy.buildout/etc/test-port-free.py -o -g 10 ${SUPERVISOR_PORTS}
+	if bin/supervisorctl status | grep -vq RUNNING; then
+		echo 'Failed to start all services:'
+		bin/supervisorctl status
+		exit 31
+	fi
+
+	pasterOutput=$(bin/paster setup-app etc/adhocracy.ini --name=content)
+	if echo "$pasterOutput" | grep -q ERROR; then
+		echo "$pasterOutput"
+		echo 'Error in paster setup'
+		exit 32
+	fi
+
+	echo
+	echo
+	echo "Type  ./paster_interactive.sh  to run the interactive paster daemon."
+	echo "Then, navigate to  http://adhocracy.lan:5001/  to see adhocracy!"
+	echo "Use the username \"admin\" and password \"password\" to login."
+	exit 33
+fi
+
 if ! $not_use_sudo_commands || $setup_services; then
 
 	SUDO_CMD=sudo
@@ -68,10 +97,19 @@ if ! $not_use_sudo_commands || $setup_services; then
 fi
 
 if $setup_services; then
+
+	wget $SERVICE_TEMPLATE -O- -nv | \
+		sed -e "s#%%USER%%#$USER#" -e "s#%%DIR%%#$(readlink -f adhocracy_buildout)#" | \
+		$SUDO_CMD tee /etc/init.d/adhocracy_services >/dev/null
+
+	$SUDO_CMD chmod a+x /etc/init.d/adhocracy_services
+	$SUDO_CMD update-rc.d adhocracy_services defaults >/dev/null
+
 	echo "Setting up services"
 	$SUDO_CMD /etc/init.d/adhocracy_services start
 	exit 0
 fi
+
 
 if $not_use_sudo_commands; then
 	echo '****** NO SUDO COMMANDS ******'
@@ -156,16 +194,6 @@ if ! $not_use_sudo_commands; then
 			$SUDO_CMD sh -c 'echo 127.0.0.1 adhocracy.lan test.adhocracy.lan >> /etc/hosts'
 		fi
 	fi
-	
-	# Setup system service
-	if $setup_services; then
-		wget $SERVICE_TEMPLATE -O- -nv | \
-			sed -e "s#%%USER%%#$USER#" -e "s#%%DIR%%#$(readlink -f adhocracy_buildout)#" | \
-			$SUDO_CMD tee /etc/init.d/adhocracy_services >/dev/null
-
-		$SUDO_CMD chmod a+x /etc/init.d/adhocracy_services
-		$SUDO_CMD update-rc.d adhocracy_services defaults >/dev/null
-	fi
 fi
 ############## nur sudo ende
 
@@ -219,32 +247,3 @@ if ! $not_use_user_commands; then
 fi
 #NUR USER ENDE
 
-
-
-
-if $autostart; then
-	
-	bin/supervisord
-	echo "Use adhocracy_buildout/bin/supervisorctl to control running services."
-	
-
-	python adhocracy.buildout/etc/test-port-free.py -o -g 10 ${SUPERVISOR_PORTS}
-	if bin/supervisorctl status | grep -vq RUNNING; then
-		echo 'Failed to start all services:'
-		bin/supervisorctl status
-		exit 31
-	fi
-
-	pasterOutput=$(bin/paster setup-app etc/adhocracy.ini --name=content)
-	if echo "$pasterOutput" | grep -q ERROR; then
-		echo "$pasterOutput"
-		echo 'Error in paster setup'
-		exit 32
-	fi
-
-	echo
-	echo
-	echo "Type  ./paster_interactive.sh  to run the interactive paster daemon."
-	echo "Then, navigate to  http://adhocracy.lan:5001/  to see adhocracy!"
-	echo "Use the username \"admin\" and password \"password\" to login."
-fi
