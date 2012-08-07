@@ -1,9 +1,7 @@
 #!/bin/sh
 
-#BUILDOUT_URL=https://bitbucket.org/liqd/adhocracy.buildout
-#SERVICE_TEMPLATE=https://bitbucket.org/liqd/adhocracy.buildout/raw/46fcef386019/etc/init.d__adhocracy_services.sh.template
-BUILDOUT_URL=https://bitbucket.org/chrisprobst/adhocracy.buildout
-SERVICE_TEMPLATE=https://bitbucket.org/chrisprobst/adhocracy.buildout/raw/580573af8714/etc/init.d__adhocracy_services.sh.template
+BUILDOUT_URL=https://bitbucket.org/liqd/adhocracy.buildout
+SERVICE_TEMPLATE=https://bitbucket.org/liqd/adhocracy.buildout/raw/default/etc/init.d__adhocracy_services.sh.template
 SUPERVISOR_PORTS="5005 5006 5010"
 PORTS="5001 ${SUPERVISOR_PORTS}"
 
@@ -34,8 +32,8 @@ install_geo=false
 buildout_variant=development
 modify_dns=false
 developer_mode=false
-autostart=false
-setup_services=false
+autostart=true
+setup_services=true
 not_use_sudo_commands=false
 not_use_user_commands=false
 
@@ -46,8 +44,8 @@ do
     D)    modify_dns=true;;
     p)    use_postgres=true;;
     m)    use_mysql=true;;
-    A)    autostart=true;;
-    S)    setup_services=true;;
+    A)    autostart=false;;
+    S)    setup_services=false;;
     s)    not_use_sudo_commands=true;;
     u)    not_use_user_commands=true;;
     ?)    usage
@@ -55,69 +53,6 @@ do
     esac
 done
 
-
-if $autostart; then
-	
-	adhocracy_buildout/bin/supervisord
-	echo "Use adhocracy_buildout/bin/supervisorctl to control running services."
-	
-
-	python adhocracy.buildout/etc/test-port-free.py -o -g 10 ${SUPERVISOR_PORTS}
-	if bin/supervisorctl status | grep -vq RUNNING; then
-		echo 'Failed to start all services:'
-		bin/supervisorctl status
-		exit 31
-	fi
-
-	pasterOutput=$(bin/paster setup-app etc/adhocracy.ini --name=content)
-	if echo "$pasterOutput" | grep -q ERROR; then
-		echo "$pasterOutput"
-		echo 'Error in paster setup'
-		exit 32
-	fi
-
-	echo
-	echo
-	echo "Type  ./paster_interactive.sh  to run the interactive paster daemon."
-	echo "Then, navigate to  http://adhocracy.lan:5001/  to see adhocracy!"
-	echo "Use the username \"admin\" and password \"password\" to login."
-	exit 33
-fi
-
-if ! $not_use_sudo_commands || $setup_services; then
-
-	SUDO_CMD=sudo
-	if [ "$(id -u)" -eq 0 ]; then
-		SUDO_CMD=
-	fi
-	if ! $SUDO_CMD true ; then
-		echo 'sudo failed. Is it installed and configured?'
-		exit 20
-	fi
-fi
-
-if $setup_services; then
-
-	wget $SERVICE_TEMPLATE -O- -nv | \
-		sed -e "s#%%USER%%#$USER#" -e "s#%%DIR%%#$(readlink -f adhocracy_buildout)#" | \
-		$SUDO_CMD tee /etc/init.d/adhocracy_services >/dev/null
-
-	$SUDO_CMD chmod a+x /etc/init.d/adhocracy_services
-	$SUDO_CMD update-rc.d adhocracy_services defaults >/dev/null
-
-	echo "Setting up services"
-	$SUDO_CMD /etc/init.d/adhocracy_services start
-	exit 0
-fi
-
-
-if $not_use_sudo_commands; then
-	echo '****** NO SUDO COMMANDS ******'
-fi
-
-if $not_use_user_commands; then
-	echo '****** NO USER COMMANDS ******'
-fi
 
 if $use_postgres && $use_mysql; then
 	echo 'Cannot use Postgres AND MySQL.'
@@ -133,13 +68,20 @@ else
 	buildout_variant=development
 fi
 
-########### nur sudo
+
 if ! $not_use_sudo_commands; then
+	SUDO_CMD=sudo
+	if [ "$(id -u)" -eq 0 ]; then
+		SUDO_CMD=
+	fi
+	if ! $SUDO_CMD true ; then
+		echo 'sudo failed. Is it installed and configured?'
+		exit 20
+	fi
 
 	$SUDO_CMD apt-get install -yqq libpng-dev libjpeg-dev gcc make build-essential bin86 unzip libpcre3-dev zlib1g-dev mercurial python python-virtualenv python-dev libsqlite3-dev openjdk-6-jre erlang-dev erlang-mnesia erlang-os-mon xsltproc libapache2-mod-proxy-html libpq-dev
 	# Not strictly required, but needed to push to bitbucket via ssh
 	$SUDO_CMD apt-get install -yqq openssh-client
-	
 	
 	if $use_postgres; then
 		$SUDO_CMD apt-get install -yqq postgresql-8.4 postgresql-server-dev-8.4 postgresql-8.4-postgis
@@ -194,56 +136,96 @@ if ! $not_use_sudo_commands; then
 			$SUDO_CMD sh -c 'echo 127.0.0.1 adhocracy.lan test.adhocracy.lan >> /etc/hosts'
 		fi
 	fi
+
+	if $setup_services; then
+
+		wget $SERVICE_TEMPLATE -O- -nv | \
+			sed -e "s#%%USER%%#$USER#" -e "s#%%DIR%%#$(readlink -f .)/adhocracy_buildout#" | \
+			$SUDO_CMD tee /etc/init.d/adhocracy_services >/dev/null
+
+		$SUDO_CMD chmod a+x /etc/init.d/adhocracy_services
+		$SUDO_CMD update-rc.d adhocracy_services defaults >/dev/null
+	fi	
 fi
-############## nur sudo ende
 
 
-
-# NUR USER
-if ! $not_use_user_commands; then
-	# Create buildout directory
-	if ! mkdir -p adhocracy_buildout; then
-		echo 'Cannot create adhocracy_buildout directory. Please change to a directory where you can create files.'
-		exit 21
-	fi
-
-	# Directory buildout was not created
-	if [ '!' -w adhocracy_buildout ]; then
-		echo 'Cannot write to adhocracy_buildout directory. Change to another directory, remove adhocracy_buildout, or run as another user'
-		exit 22
-	fi
-	if [ -x adhocracy_buildout/bin/supervisorctl ]; then
-		adhocracy_buildout/bin/supervisorctl shutdown >/dev/null
-	fi
-
-	test_port_free_tmp=$(mktemp)
-	if [ '!' -e ./test-port-free.py ]; then
-		wget -q $BUILDOUT_URL/raw/default/etc/test-port-free.py -O $test_port_free_tmp
-	fi
-	python $test_port_free_tmp -g 10 --kill-pid $PORTS
-	rm -f $test_port_free_tmp
-
-
-	virtualenv --distribute --no-site-packages adhocracy_buildout
-	ORIGINAL_PWD=$(pwd)
-	cd adhocracy_buildout
-	if [ -e adhocracy.buildout ]; then
-		hg pull --quiet -u -R adhocracy.buildout
-	else
-		hg clone --quiet $BUILDOUT_URL adhocracy.buildout
-	fi
-
-	for f in adhocracy.buildout/*; do ln -sf $f; done
-
-
-	. bin/activate
-
-	bin/python bootstrap.py -c buildout_${buildout_variant}.cfg
-	bin/buildout -Nc buildout_${buildout_variant}.cfg
-
-	ln -sf adhocracy_buildout/adhocracy.buildout/etc/paster_interactive.sh "$ORIGINAL_PWD"
-	ln -sf adhocracy_buildout/src/adhocracy "$ORIGINAL_PWD"
-
+if $not_use_user_commands; then
+	exit 0
 fi
-#NUR USER ENDE
 
+
+if [ "$(id -u)" -eq 0 ]; then
+	echo "You should not install adhocracy as a root user"
+	exit 33
+fi
+
+# Create buildout directory
+if ! mkdir -p adhocracy_buildout; then
+	echo 'Cannot create adhocracy_buildout directory. Please change to a directory where you can create files.'
+	exit 21
+fi
+
+# Directory buildout was not created
+if [ '!' -w adhocracy_buildout ]; then
+	echo 'Cannot write to adhocracy_buildout directory. Change to another directory, remove adhocracy_buildout, or run as another user'
+	exit 22
+fi
+if [ -x adhocracy_buildout/bin/supervisorctl ]; then
+	adhocracy_buildout/bin/supervisorctl shutdown >/dev/null
+fi
+
+test_port_free_tmp=$(mktemp)
+if [ '!' -e ./test-port-free.py ]; then
+	wget -q $BUILDOUT_URL/raw/default/etc/test-port-free.py -O $test_port_free_tmp
+fi
+python $test_port_free_tmp -g 10 --kill-pid $PORTS
+rm -f $test_port_free_tmp
+
+
+virtualenv --distribute --no-site-packages adhocracy_buildout
+ORIGINAL_PWD=$(pwd)
+cd adhocracy_buildout
+if [ -e adhocracy.buildout ]; then
+	hg pull --quiet -u -R adhocracy.buildout
+else
+	hg clone --quiet $BUILDOUT_URL adhocracy.buildout
+fi
+
+for f in adhocracy.buildout/*; do ln -sf $f; done
+
+
+. bin/activate
+
+bin/python bootstrap.py -c buildout_${buildout_variant}.cfg
+bin/buildout -Nc buildout_${buildout_variant}.cfg
+
+ln -sf adhocracy_buildout/adhocracy.buildout/etc/paster_interactive.sh "$ORIGINAL_PWD"
+ln -sf adhocracy_buildout/src/adhocracy "$ORIGINAL_PWD"
+
+
+if $autostart; then
+	
+	adhocracy_buildout/bin/supervisord
+	echo "Use adhocracy_buildout/bin/supervisorctl to control running services."
+	
+
+	python adhocracy.buildout/etc/test-port-free.py -o -g 10 ${SUPERVISOR_PORTS}
+	if bin/supervisorctl status | grep -vq RUNNING; then
+		echo 'Failed to start all services:'
+		bin/supervisorctl status
+		exit 31
+	fi
+
+	pasterOutput=$(bin/paster setup-app etc/adhocracy.ini --name=content)
+	if echo "$pasterOutput" | grep -q ERROR; then
+		echo "$pasterOutput"
+		echo 'Error in paster setup'
+		exit 32
+	fi
+
+	echo
+	echo
+	echo "Type  ./paster_interactive.sh  to run the interactive paster daemon."
+	echo "Then, navigate to  http://adhocracy.lan:5001/  to see adhocracy!"
+	echo "Use the username \"admin\" and password \"password\" to login."
+fi
