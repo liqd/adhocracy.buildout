@@ -55,7 +55,7 @@ do
     esac
 done
 
-if ! $not_use_sudo_commands || $setup_service; then
+if ! $not_use_sudo_commands || $setup_services; then
 
 	SUDO_CMD=sudo
 	if [ "$(id -u)" -eq 0 ]; then
@@ -67,7 +67,7 @@ if ! $not_use_sudo_commands || $setup_service; then
 	fi
 fi
 
-if $setup_service; then
+if $setup_services; then
 	echo "Setting up services"
 	$SUDO_CMD /etc/init.d/adhocracy_services start
 	exit 0
