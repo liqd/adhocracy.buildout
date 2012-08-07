@@ -56,7 +56,7 @@ do
 done
 
 if $not_use_sudo_commands && $autostart && $setup_services; then
-	echo 'ERROR: You can\'t setup services without sudo!'
+	echo 'ERROR: You cant setup services without sudo!'
 	exit 33
 fi
 
@@ -162,7 +162,6 @@ if ! $not_use_sudo_commands; then
 		$SUDO_CMD chmod a+x /etc/init.d/adhocracy_services
 		$SUDO_CMD update-rc.d adhocracy_services defaults >/dev/null
 	fi
-	
 fi
 ############## nur sudo ende
 
