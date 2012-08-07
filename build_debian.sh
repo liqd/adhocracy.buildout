@@ -34,8 +34,8 @@ install_geo=false
 buildout_variant=development
 modify_dns=false
 developer_mode=false
-autostart=true
-setup_services=true
+autostart=false
+setup_services=false
 not_use_sudo_commands=false
 not_use_user_commands=false
 
@@ -46,8 +46,8 @@ do
     D)    modify_dns=true;;
     p)    use_postgres=true;;
     m)    use_mysql=true;;
-    A)    autostart=false;;
-    S)    setup_services=false;;
+    A)    autostart=true;;
+    S)    setup_services=true;;
     s)    not_use_sudo_commands=true;;
     u)    not_use_user_commands=true;;
     ?)    usage
@@ -55,9 +55,22 @@ do
     esac
 done
 
-if $not_use_sudo_commands && $autostart && $setup_services; then
-	echo 'ERROR: You cant setup services without sudo!'
-	exit 33
+if ! $not_use_sudo_commands || $setup_service; then
+
+	SUDO_CMD=sudo
+	if [ "$(id -u)" -eq 0 ]; then
+		SUDO_CMD=
+	fi
+	if ! $SUDO_CMD true ; then
+		echo 'sudo failed. Is it installed and configured?'
+		exit 20
+	fi
+fi
+
+if $setup_service; then
+	echo "Setting up services"
+	$SUDO_CMD /etc/init.d/adhocracy_services start
+	exit 0
 fi
 
 if $not_use_sudo_commands; then
@@ -84,15 +97,6 @@ fi
 
 ########### nur sudo
 if ! $not_use_sudo_commands; then
-
-	SUDO_CMD=sudo
-	if [ "$(id -u)" -eq 0 ]; then
-		SUDO_CMD=
-	fi
-	if ! $SUDO_CMD true ; then
-		echo 'sudo failed. Is it installed and configured?'
-		exit 20
-	fi
 
 	$SUDO_CMD apt-get install -yqq libpng-dev libjpeg-dev gcc make build-essential bin86 unzip libpcre3-dev zlib1g-dev mercurial python python-virtualenv python-dev libsqlite3-dev openjdk-6-jre erlang-dev erlang-mnesia erlang-os-mon xsltproc libapache2-mod-proxy-html libpq-dev
 	# Not strictly required, but needed to push to bitbucket via ssh
@@ -156,7 +160,7 @@ if ! $not_use_sudo_commands; then
 	# Setup system service
 	if $setup_services; then
 		wget $SERVICE_TEMPLATE -O- -nv | \
-			sed -e "s#%%USER%%#$USER#" -e "s#%%DIR%%#$(readlink -f .)#" | \
+			sed -e "s#%%USER%%#$USER#" -e "s#%%DIR%%#$(readlink -f adhocracy_buildout)#" | \
 			$SUDO_CMD tee /etc/init.d/adhocracy_services >/dev/null
 
 		$SUDO_CMD chmod a+x /etc/init.d/adhocracy_services
@@ -217,34 +221,30 @@ fi
 
 
 
+
 if $autostart; then
-	if $setup_service; then
-			$SUDO_CMD /etc/init.d/adhocracy_services start
-	else
-		bin/supervisord
-		echo "Use adhocracy_buildout/bin/supervisorctl to control running services."
-	fi
 	
-	if ! $not_use_user_commands; then
-		python adhocracy.buildout/etc/test-port-free.py -o -g 10 ${SUPERVISOR_PORTS}
-		if bin/supervisorctl status | grep -vq RUNNING; then
-			echo 'Failed to start all services:'
-			bin/supervisorctl status
-			exit 31
-		fi
+	bin/supervisord
+	echo "Use adhocracy_buildout/bin/supervisorctl to control running services."
+	
 
-		pasterOutput=$(bin/paster setup-app etc/adhocracy.ini --name=content)
-		if echo "$pasterOutput" | grep -q ERROR; then
-			echo "$pasterOutput"
-			echo 'Error in paster setup'
-			exit 32
-		fi
-
-		echo
-		echo
-		echo "Type  ./paster_interactive.sh  to run the interactive paster daemon."
-		echo "Then, navigate to  http://adhocracy.lan:5001/  to see adhocracy!"
-		echo "Use the username \"admin\" and password \"password\" to login."
+	python adhocracy.buildout/etc/test-port-free.py -o -g 10 ${SUPERVISOR_PORTS}
+	if bin/supervisorctl status | grep -vq RUNNING; then
+		echo 'Failed to start all services:'
+		bin/supervisorctl status
+		exit 31
 	fi
-fi
 
+	pasterOutput=$(bin/paster setup-app etc/adhocracy.ini --name=content)
+	if echo "$pasterOutput" | grep -q ERROR; then
+		echo "$pasterOutput"
+		echo 'Error in paster setup'
+		exit 32
+	fi
+
+	echo
+	echo
+	echo "Type  ./paster_interactive.sh  to run the interactive paster daemon."
+	echo "Then, navigate to  http://adhocracy.lan:5001/  to see adhocracy!"
+	echo "Use the username \"admin\" and password \"password\" to login."
+fi
