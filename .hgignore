@@ -25,4 +25,4 @@ etc/vhost.conf
 etc/sysv-init
 etc/adhocracy-interactive.ini
 mailsink
-
+adhocracy-test-chroot
