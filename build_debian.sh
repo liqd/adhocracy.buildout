@@ -182,7 +182,7 @@ if [ '!' -w adhocracy_buildout ]; then
 	exit 22
 fi
 if [ -x adhocracy_buildout/bin/supervisorctl ]; then
-	adhocracy_buildout/bin/supervisorctl shutdown >/dev/null
+	adhocracy_buildout/bin/supervisorctl shutdown >/dev/null || true
 fi
 
 test_port_free_tmp=$(mktemp)
