@@ -219,10 +219,8 @@ ln -sf adhocracy_buildout/src/adhocracy "$ORIGINAL_PWD"
 
 
 if $autostart; then
-	
-	adhocracy_buildout/bin/supervisord
+	bin/supervisord
 	echo "Use adhocracy_buildout/bin/supervisorctl to control running services."
-	
 
 	python adhocracy.buildout/etc/test-port-free.py -o -g 10 ${SUPERVISOR_PORTS}
 	if bin/supervisorctl status | grep -vq RUNNING; then
