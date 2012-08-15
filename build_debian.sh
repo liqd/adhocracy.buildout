@@ -17,14 +17,14 @@ Install adhocracy on debian.
 OPTIONS:
    -h      Show this message
    -D      Install a DNS server to answer *.adhocracy.lan
-   -p      Use postgres (for automated performance/integration tests)
    -P      Install for production system
-   -m      Use MySQL
+   -p      Install postgresSQL
+   -m      Install MySQL
    -A      Do not start now
    -S      Do not configure system services
-   -s      Do not use sudo commands
-   -u      Do not use user commands
-   -U	   Set the adhocracy user if you are running as root
+   -s      Install only non-superuser parts
+   -u      Install only superuser parts
+   -U	   Set the username adhocracy should run as
 EOF
 }
 
@@ -84,6 +84,7 @@ else
 	buildout_variant=development
 fi
 
+
 if ! $not_use_sudo_commands; then
 	SUDO_CMD=sudo
 	if [ "$(id -u)" -eq 0 ]; then
@@ -133,7 +134,7 @@ if ! $not_use_sudo_commands; then
           | mysql --user root --password=${MYSQL_ROOTPW}
 
 	fi
-	
+
 	# Set up DNS names
 	if $modify_dns; then
 		$SUDO_CMD apt-get install -qqy dnsmasq
@@ -218,6 +219,8 @@ for f in adhocracy.buildout/*; do ln -sf $f; done
 
 
 . bin/activate
+
+# TODO write buildout file with configurations (sysv_init:user ...) and use that
 
 bin/python bootstrap.py -c buildout_${buildout_variant}.cfg
 bin/buildout -Nc buildout_${buildout_variant}.cfg
