@@ -97,7 +97,7 @@ if ! $not_use_sudo_commands; then
 		exit 20
 	fi
 
-	$SUDO_CMD apt-get install -yqq libpng-dev libjpeg-dev gcc make build-essential bin86 unzip libpcre3-dev zlib1g-dev mercurial python python-virtualenv libmysqlclient-dev python-dev libsqlite3-dev openjdk-6-jre erlang-dev erlang-mnesia erlang-os-mon xsltproc libapache2-mod-proxy-html libpq-dev
+	$SUDO_CMD apt-get install -yqq libpng-dev libjpeg-dev gcc make build-essential bin86 unzip libpcre3-dev zlib1g-dev mercurial python python-virtualenv python-dev libsqlite3-dev openjdk-6-jre erlang-dev erlang-mnesia erlang-os-mon xsltproc libapache2-mod-proxy-html libpq-dev
 	# Not strictly required, but needed to push to bitbucket via ssh
 	$SUDO_CMD apt-get install -yqq openssh-client
 	
@@ -107,7 +107,7 @@ if ! $not_use_sudo_commands; then
 	if $use_mysql; then
 		echo "mysql mysql-server/root_password string ${MYSQL_ROOTPW}" | $SUDO_CMD debconf-set-selections
 		echo "mysql mysql-server/root_password_again string ${MYSQL_ROOTPW}" | $SUDO_CMD debconf-set-selections
-		$SUDO_CMD apt-get install -yqq mysql-server python-mysqldb libmysqld-dev
+		$SUDO_CMD apt-get install -yqq mysql-server libmysqld-dev python-mysqldb
 		$SUDO_CMD sed -i "s%^bind-address.*%\#bind-address = 127.0.0.1\nskip-networking%" /etc/mysql/my.cnf
 		$SUDO_CMD /etc/init.d/mysql restart
 	fi
