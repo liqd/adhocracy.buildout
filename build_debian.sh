@@ -18,6 +18,7 @@ OPTIONS:
    -h      Show this message
    -D      Install a DNS server to answer *.adhocracy.lan
    -p      Use postgres (for automated performance/integration tests)
+   -P      Install for production system
    -m      Use MySQL
    -A      Do not start now
    -S      Do not configure system services
@@ -30,9 +31,9 @@ EOF
 use_postgres=false
 use_mysql=false
 install_geo=false
+production_install=false
 buildout_variant=development
 modify_dns=false
-developer_mode=false
 autostart=true
 setup_services=true
 not_use_sudo_commands=false
@@ -43,10 +44,9 @@ if [ -n "$SUDO_USER" ]; then
 	adhoc_user=$SUDO_USER
 fi
 
-while getopts dDpmASsuU: name
+while getopts DpPmASsuU: name
 do
     case $name in
-    d)    developer_mode=true;;
     D)    modify_dns=true;;
     p)    use_postgres=true;;
     m)    use_mysql=true;;
@@ -55,6 +55,7 @@ do
     s)    not_use_sudo_commands=true;;
     u)    not_use_user_commands=true;;
     U)	  adhoc_user=$OPTARG;;
+    P)    production_install=true;;
     ?)    usage
           exit 2;;
     esac
@@ -66,7 +67,15 @@ if $use_postgres && $use_mysql; then
 	exit 3
 fi
 
-if $use_postgres; then
+
+if $production_install; then
+	if $use_postgres || $use_mysql; then
+		echo Production install requires pre-installed database
+		exit 33
+	fi
+
+	buildout_variant=production
+elif $use_postgres; then
 	buildout_variant=development_postgres
 elif $use_mysql; then
 	buildout_variant=development_mysql
@@ -74,7 +83,6 @@ elif $use_mysql; then
 else
 	buildout_variant=development
 fi
-
 
 if ! $not_use_sudo_commands; then
 	SUDO_CMD=sudo
