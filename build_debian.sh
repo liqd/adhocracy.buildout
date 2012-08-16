@@ -5,9 +5,6 @@ SERVICE_TEMPLATE=https://bitbucket.org/liqd/adhocracy.buildout/raw/default/etc/i
 SUPERVISOR_PORTS="5005 5006 5010"
 ADHOCRACY_PORT=5001
 
- # Kommentare ... (ENDE ANFANG Erfolg/Misserfolg)
- # production cfg warnung
-
 set -e
 
 usage()
@@ -20,14 +17,14 @@ Install adhocracy on debian.
 OPTIONS:
    -h      Show this message
    -D      Install a DNS server to answer *.adhocracy.lan
-   -p      Use postgres (for automated performance/integration tests)
-   -m      Use MySQL
+   -p      Install postgresSQL
+   -m      Install MySQL
    -c file Use the given buildout config file   
    -A      Do not start now
    -S      Do not configure system services
-   -s      Do not use sudo commands
-   -u      Do not use user commands
-   -U	   Set the adhocracy user if you are running as root
+   -s      Install only non-superuser parts
+   -u      Install only superuser parts
+   -U	   Set the username adhocracy should run as
 EOF
 }
 
@@ -85,6 +82,7 @@ else
 	buildout_cfg_file=buildout_development.cfg
 fi
 
+
 if ! $not_use_sudo_commands; then
 	SUDO_CMD=sudo
 	if [ "$(id -u)" -eq 0 ]; then
@@ -134,7 +132,7 @@ if ! $not_use_sudo_commands; then
           | mysql --user root --password=${MYSQL_ROOTPW}
 
 	fi
-	
+
 	# Set up DNS names
 	if $modify_dns; then
 		$SUDO_CMD apt-get install -qqy dnsmasq
@@ -223,6 +221,8 @@ if echo $buildout_cfg_file | grep "^/" -q; then
 fi
 
 . bin/activate
+
+# TODO write buildout file with configurations (sysv_init:user ...) and use that
 
 bin/python bootstrap.py -c ${buildout_cfg_file}
 bin/buildout -Nc ${buildout_cfg_file}
