@@ -21,8 +21,8 @@ OPTIONS:
    -h      Show this message
    -D      Install a DNS server to answer *.adhocracy.lan
    -p      Use postgres (for automated performance/integration tests)
-   -P      Install for production system
    -m      Use MySQL
+   -c file Use the given buildout config file   
    -A      Do not start now
    -S      Do not configure system services
    -s      Do not use sudo commands
@@ -34,8 +34,7 @@ EOF
 use_postgres=false
 use_mysql=false
 install_geo=false
-production_install=false
-buildout_variant=development
+buildout_cfg_file=
 modify_dns=false
 autostart=true
 setup_services=true
@@ -47,7 +46,7 @@ if [ -n "$SUDO_USER" ]; then
 	adhoc_user=$SUDO_USER
 fi
 
-while getopts DpPmASsuU: name
+while getopts DpmASsuc:U: name
 do
     case $name in
     D)    modify_dns=true;;
@@ -58,7 +57,7 @@ do
     s)    not_use_sudo_commands=true;;
     u)    not_use_user_commands=true;;
     U)	  adhoc_user=$OPTARG;;
-    P)    production_install=true;;
+    c)    buildout_cfg_file=$OPTARG;;
     ?)    usage
           exit 2;;
     esac
@@ -71,20 +70,19 @@ if $use_postgres && $use_mysql; then
 fi
 
 
-if $production_install; then
+if [ -n "$buildout_cfg_file" ]; then
 	if $use_postgres || $use_mysql; then
-		echo Production install requires pre-installed database
+		echo "Buildout config file precludes the -p and -m option"
 		exit 33
 	fi
-
-	buildout_variant=production
+	buildout_cfg_file=$(readlink -f "$buildout_cfg_file")
 elif $use_postgres; then
-	buildout_variant=development_postgres
+	buildout_cfg_file=buildout_development_postgres.cfg
 elif $use_mysql; then
-	buildout_variant=development_mysql
+	buildout_cfg_file=buildout_development_mysql.cfg
 	MYSQL_ROOTPW="sqlrootpw"
 else
-	buildout_variant=development
+	buildout_cfg_file=buildout_development.cfg
 fi
 
 if ! $not_use_sudo_commands; then
@@ -218,12 +216,20 @@ else
 fi
 
 for f in adhocracy.buildout/*; do ln -sf $f; done
-
+if echo $buildout_cfg_file | grep "^/" -q; then
+	tmp_file=$(mktemp --tmpdir=.)
+	cp $buildout_cfg_file $tmp_file
+	buildout_cfg_file=$tmp_file
+fi
 
 . bin/activate
 
-bin/python bootstrap.py -c buildout_${buildout_variant}.cfg
-bin/buildout -Nc buildout_${buildout_variant}.cfg
+bin/python bootstrap.py -c ${buildout_cfg_file}
+bin/buildout -Nc ${buildout_cfg_file}
+
+if [ -n "$tmp_file" ]; then
+	rm "$tmp_file"
+fi
 
 ln -sf adhocracy_buildout/adhocracy.buildout/etc/paster_interactive.sh "$ORIGINAL_PWD"
 ln -sf adhocracy_buildout/src/adhocracy "$ORIGINAL_PWD"
