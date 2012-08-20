@@ -169,6 +169,9 @@ fi
 
 if $not_use_user_commands; then
 	exit 0
+elif [ "$(basename $(pwd))" = "adhocracy_buildout" ]; then
+	echo "You should not run build_debian.sh from the adhocracy_buildout directory"
+	exit 34
 fi
 
 
