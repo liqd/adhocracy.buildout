@@ -66,9 +66,8 @@ if $use_postgres && $use_mysql; then
 	exit 3
 fi
 
-
-if [ "$(basename $(pwd))" = "adhocracy_buildout" ]; then
-	echo "You should not run build_debian.sh from the adhocracy_buildout directory"
+if [ "${PWD#*/adhocracy_buildout}" != "$PWD" ]; then
+	echo "You should not run build_debian.sh from the adhocracy_buildout directory. Instead, run it from the directory which contains adhocracy_buildout."
 	exit 34
 fi
 
