@@ -67,6 +67,12 @@ if $use_postgres && $use_mysql; then
 fi
 
 
+if [ "$(basename $(pwd))" = "adhocracy_buildout" ]; then
+	echo "You should not run build_debian.sh from the adhocracy_buildout directory"
+	exit 34
+fi
+
+
 if [ -n "$buildout_cfg_file" ]; then
 	if $use_postgres || $use_mysql; then
 		echo "Buildout config file precludes the -p and -m option"
@@ -169,9 +175,6 @@ fi
 
 if $not_use_user_commands; then
 	exit 0
-elif [ "$(basename $(pwd))" = "adhocracy_buildout" ]; then
-	echo "You should not run build_debian.sh from the adhocracy_buildout directory"
-	exit 34
 fi
 
 
