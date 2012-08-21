@@ -17,8 +17,9 @@ Install adhocracy on debian.
 OPTIONS:
    -h      Show this message
    -D      Install a DNS server to answer *.adhocracy.lan
-   -p      Install postgresSQL
-   -m      Install MySQL
+   -p      Install a postgresSQL server
+   -m      Install a MySQL server
+   -M      Install MySQL client libraries
    -c file Use the given buildout config file   
    -A      Do not start now
    -S      Do not configure system services
@@ -38,6 +39,7 @@ setup_services=true
 not_use_sudo_commands=false
 not_use_user_commands=false
 adhoc_user=$USER
+install_mysql_client=false
 
 if [ -n "$SUDO_USER" ]; then
 	adhoc_user=$SUDO_USER
@@ -49,6 +51,7 @@ do
     D)    modify_dns=true;;
     p)    use_postgres=true;;
     m)    use_mysql=true;;
+    M)    install_mysql_client=true;;
     A)    autostart=false;;
     S)    setup_services=false;;
     s)    not_use_sudo_commands=true;;
@@ -104,6 +107,9 @@ if ! $not_use_sudo_commands; then
 	
 	if $use_postgres; then
 		$SUDO_CMD apt-get install -yqq postgresql-8.4 postgresql-server-dev-8.4 postgresql-8.4-postgis
+	fi
+	if $install_mysql_client; then
+        $SUDO_CMD apt-get install -yqq libmysqlclient-dev
 	fi
 	if $use_mysql; then
 		echo "mysql mysql-server/root_password string ${MYSQL_ROOTPW}" | $SUDO_CMD debconf-set-selections
