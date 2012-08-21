@@ -1,7 +1,8 @@
 #!/bin/sh
 
 BUILDOUT_URL=https://bitbucket.org/liqd/adhocracy.buildout
-SERVICE_TEMPLATE=https://bitbucket.org/liqd/adhocracy.buildout/raw/default/etc/init.d__adhocracy_services.sh.template
+SERVICE_TEMPLATE=etc/init.d__adhocracy_services.sh.template
+SERVICE_TEMPLATE_URL=$BUILDOUT_URL/raw/default/$SERVICE_TEMPLATE
 SUPERVISOR_PORTS="5005 5006 5010"
 ADHOCRACY_PORT=5001
 
@@ -45,7 +46,7 @@ if [ -n "$SUDO_USER" ]; then
 	adhoc_user=$SUDO_USER
 fi
 
-while getopts DpmASsuc:U: name
+while getopts DpMmASsuc:U: name
 do
     case $name in
     D)    modify_dns=true;;
@@ -104,7 +105,7 @@ if ! $not_use_sudo_commands; then
 	$SUDO_CMD apt-get install -yqq libpng-dev libjpeg-dev gcc make build-essential bin86 unzip libpcre3-dev zlib1g-dev mercurial python python-virtualenv python-dev libsqlite3-dev openjdk-6-jre erlang-dev erlang-mnesia erlang-os-mon xsltproc libapache2-mod-proxy-html libpq-dev
 	# Not strictly required, but needed to push to bitbucket via ssh
 	$SUDO_CMD apt-get install -yqq openssh-client
-	
+
 	if $use_postgres; then
 		$SUDO_CMD apt-get install -yqq postgresql-8.4 postgresql-server-dev-8.4 postgresql-8.4-postgis
 	fi
@@ -167,14 +168,19 @@ if ! $not_use_sudo_commands; then
 			echo "You are root. Please use the -U flag to set the user adhocracy should be running as"
 			exit 35
 		fi
-	
-		wget $SERVICE_TEMPLATE -O- -nv | \
+
+        if [ -r "adhocracy_buildout/adhocracy.buildout/${SERVICE_TEMPLATE}" ]; then
+            stmpl=$(cat "adhocracy_buildout/adhocracy.buildout/${SERVICE_TEMPLATE}")
+        else
+            stmpl=$(wget $SERVICE_TEMPLATE_URL -O- -nv)
+        fi
+		echo "$stmpl" | \
 			sed -e "s#%%USER%%#$adhoc_user#" -e "s#%%DIR%%#$(readlink -f .)/adhocracy_buildout#" | \
 			$SUDO_CMD tee /etc/init.d/adhocracy_services >/dev/null
 
 		$SUDO_CMD chmod a+x /etc/init.d/adhocracy_services
 		$SUDO_CMD update-rc.d adhocracy_services defaults >/dev/null
-	fi	
+	fi
 fi
 
 
