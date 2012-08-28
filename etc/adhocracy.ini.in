@@ -187,6 +187,10 @@ adhocracy.cache_tiles = True
 
 # adhocracy.instance = adhocracy
 
+# INSTALL: Add an HTTP header that identifies the server we're running on
+#adhocracy.include_machine_name_in_header = True
+
+
 # Statistics via Piwik
 piwik.site = 
 piwik.id = 
