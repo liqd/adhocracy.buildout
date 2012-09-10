@@ -195,6 +195,16 @@ adhocracy.cache_tiles = True
 piwik.site = 
 piwik.id = 
 
+# activate geo features
+adhocracy.proposal_geotags = True
+adhocracy.show_overview_map_on_index = True
+adhocracy.show_overview_map_on_instance_index = False
+
+adhocracy.hide_instance_list_in_navigation = False
+
+# useful in settings where users can create instances
+adhocracy.show_instance_creators = False
+
 # Logging configuration
 [loggers]
 keys = root, adhocracy, sqlalchemy
