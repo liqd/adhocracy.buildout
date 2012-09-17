@@ -27,6 +27,7 @@ OPTIONS:
    -s      Install only non-superuser parts
    -u      Install only superuser parts
    -U	   Set the username adhocracy should run as
+   -b      Branch to check out
 EOF
 }
 
@@ -41,12 +42,13 @@ not_use_sudo_commands=false
 not_use_user_commands=false
 adhoc_user=$USER
 install_mysql_client=false
+branch=default
 
 if [ -n "$SUDO_USER" ]; then
 	adhoc_user=$SUDO_USER
 fi
 
-while getopts DpMmASsuc:U: name
+while getopts DpMmASsuc:U:b: name
 do
     case $name in
     D)    modify_dns=true;;
@@ -59,6 +61,7 @@ do
     u)    not_use_user_commands=true;;
     U)	  adhoc_user=$OPTARG;;
     c)    buildout_cfg_file=$OPTARG;;
+    b)    branch=$OPTARG;;
     ?)    usage
           exit 2;;
     esac
@@ -225,10 +228,11 @@ virtualenv --distribute --no-site-packages adhocracy_buildout
 ORIGINAL_PWD=$(pwd)
 cd adhocracy_buildout
 if [ -e adhocracy.buildout ]; then
-	hg pull --quiet -u -R adhocracy.buildout
+	hg pull --quiet -R adhocracy.buildout
 else
 	hg clone --quiet $BUILDOUT_URL adhocracy.buildout
 fi
+(cd adhocracy.buildout && hg up $branch > /dev/null)
 
 for f in adhocracy.buildout/*; do ln -sf $f; done
 if echo $buildout_cfg_file | grep "^/" -q; then
