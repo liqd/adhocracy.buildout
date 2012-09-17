@@ -28,7 +28,7 @@ Add the `-p` option to use PostgreSQL or the `-m` option to use MySQL instead of
 Developer Instructions
 ----------------------
 
-adhocracy itself gets installed in `./adhocracy`. To use your own [fork](http://confluence.atlassian.com/display/BITBUCKET/Forking+a+bitbucket+Repository) instead of the regular("upstream") adhocracy, edit `./adhocracy/.hg/.hgrc` to say the following:
+adhocracy itself gets installed in `adhocracy_buildout/src/adhocracy`. To use your own [fork](http://confluence.atlassian.com/display/BITBUCKET/Forking+a+bitbucket+Repository) instead of the regular("upstream") adhocracy, edit `adhocracy_buildout/src/adhocracy/.hg/.hgrc` to say the following:
 
 
     [ui]

@@ -249,7 +249,6 @@ if [ -n "$tmp_file" ]; then
 fi
 
 ln -sf adhocracy_buildout/adhocracy.buildout/etc/paster_interactive.sh "$ORIGINAL_PWD"
-ln -sf adhocracy_buildout/src/adhocracy "$ORIGINAL_PWD"
 
 
 if $autostart; then
