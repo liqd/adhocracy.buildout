@@ -22,55 +22,17 @@ threadpool_workers = 20
 
 [composite:main]
 use = egg:Paste#urlmap
-/static_theme = static
-/_wordpress = wordpress_pipe
 / = default
 
-###################diazo theme adhocracy ###################
+################### HHU: Disable diazo theming ###################
 
 # Serve the theme from disk from /static (as set up in [composite:main])
 [app:static]
 use = egg:Paste#static
-document_root =  ${parts.adhocracy_code.diazo_theme_rules_dir}
 
 # Serve the Diazo-transformed content everywhere else
 [pipeline:default]
-pipeline = theme
-           content
-
-#[filter:wsgirewrite]
-#use = egg:WSGIRewrite
-#rulesets = testurls
-
-#[wsgirewrite:testurls]
-#rule1 = ^/test$ /index
-
-# Reference the rules file and the prefix applied to relative links
-# (e.g. the stylesheet). We turn on debug mode so that the theme is
-# re-built on each request, making it easy to experiment.
-
-[filter:theme]
-use = egg:diazo
-read_network = True
-rules = ${parts.adhocracy_code.diazo_theme_rules_dir}/rules.xml
-prefix = /static_theme
-doctype = <!DOCTYPE html>
-{% if parts.adhocracy.debug == 'True' %}debug = true  {% end %}
-{% if parts.adhocracy.debug != 'True' %}debug = false {% end %}
-wordpress_backend = ${parts.domains.blog} 
-wordpress_backend_startseite = ${parts.domains.blog}/startseite/
-
-###################diazo theme wordpress ###################
-
-[pipeline:wordpress_pipe]
-pipeline = theme
-           _wordpress
- 
-# Proxy wordpress 
-[app:_wordpress]
-use = egg:Paste#proxy
-address = http://${parts.domains.blog} 
-suppress_http_headers = accept-encoding
+pipeline = content
 
 ###################Adhocracy conf ###################
 
@@ -187,8 +149,12 @@ adhocracy.cache_tiles = True
 
 # adhocracy.instance = adhocracy
 
+# INSTALL: Use URLs like /i/meta/proposal/foo instead of
+#          http://meta.adhocracy.lan:5001/proposal/foo
+adhocracy.relative_urls = True
+
 # INSTALL: Add an HTTP header that identifies the server we're running on
-#adhocracy.include_machine_name_in_header = True
+adhocracy.include_machine_name_in_header = True
 
 
 # Statistics via Piwik
