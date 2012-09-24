@@ -19,7 +19,7 @@ Installation on debian or Ubuntu
 
 On debian or Ubuntu, you can simply execute the following in a terminal:
 
-    wget -nv https://bitbucket.org/liqd/adhocracy.buildout/raw/tip/build_debian.sh -O build_debian.sh && sh build_debian.sh
+    wget -nv https://raw.github.com/liqd/adhocracy.buildout/master/build_debian.sh -O build_debian.sh && sh build_debian.sh
 
 The script will use sudo to install the required dependencies, and install, set up, and start the required database services.
 
@@ -28,23 +28,15 @@ Add the `-p` option to use PostgreSQL or the `-m` option to use MySQL instead of
 Developer Instructions
 ----------------------
 
-adhocracy itself gets installed in `adhocracy_buildout/src/adhocracy`. To use your own [fork](http://confluence.atlassian.com/display/BITBUCKET/Forking+a+bitbucket+Repository) instead of the regular("upstream") adhocracy, edit `adhocracy_buildout/src/adhocracy/.hg/.hgrc` to say the following:
+adhocracy itself gets installed in `adhocracy_buildout/src/adhocracy`. To use your own [fork](https://help.github.com/articles/fork-a-repo) instead of the regular("upstream") adhocracy, use [`git remote`](http://www.kernel.org/pub/software/scm/git/docs/git-remote.html):
 
+    $ git remote -v
+    origin  https://github.com/liqd/adhocracy (fetch)
+    origin  https://github.com/liqd/adhocracy (push)
+    $ git remote add USERNAME https://github.com/USERNAME/adhocracy
+    $ git push USERNAME
 
-    [ui]
-    username = JOHN SMITH <john.smith@example.com>
-
-    [paths]
-    liqd = https://bitbucket.org/liqd/adhocracy
-    default = https://bitbucket.org/USERNAME/adhocracy
-
-    # Or, if you have an ssh key configured:
-    # (see SSH keys under https://bitbucket.org/account/ )
-    # default = ssh://hg@bitbucket.org/USERNAME/adhocracy
-
-Enter your real name and email address in the second line, and replace `USERNAME` with your bitbucket user name.
-
-You can now execute `hg pull -u liqd` to update your local copy with new upstream changes. Use [`commit`](http://mercurial.selenic.com/wiki/Commit) and [`push`](http://www.selenic.com/mercurial/hg.1.html#push) to record and publish your changes.  As soon as you are confident that you have implemented a feature or corrected a bug, create a [pull request](http://confluence.atlassian.com/display/BITBUCKET/Working+with+pull+requests) to ask the core developers to incorporate your changes.
+You can now execute `git pull origin` to update your local copy with new upstream changes. Use [`commit`](http://www.kernel.org/pub/software/scm/git/docs/git-commit.html) and [`push`](http://www.kernel.org/pub/software/scm/git/docs/git-push.html) to record and publish your changes.  As soon as you are confident that you have implemented a feature or corrected a bug, create a [pull request](https://help.github.com/articles/using-pull-requests) to ask the core developers to incorporate your changes.
 
 Installation on non-debian systems
 ----------------------------------
