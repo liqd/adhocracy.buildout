@@ -3,6 +3,7 @@
 BUILDOUT_URL=https://github.com/liqd/adhocracy.buildout
 SERVICE_TEMPLATE=etc/init.d__adhocracy_services.sh.template
 SERVICE_TEMPLATE_URL=https://raw.github.com/liqd/adhocracy.buildout/master/$SERVICE_TEMPLATE
+TEST_PORT_FREE_URL=https://raw.github.com/liqd/adhocracy.buildout/master/etc/test-port-free.py
 SUPERVISOR_PORTS="5005 5006 5010"
 ADHOCRACY_PORT=5001
 
@@ -214,7 +215,7 @@ fi
 
 test_port_free_tmp=$(mktemp)
 if [ '!' -e ./test-port-free.py ]; then
-	if ! wget -q $BUILDOUT_URL/raw/default/etc/test-port-free.py -O $test_port_free_tmp; then
+	if ! wget -q $TEST_PORT_FREE_URL -O $test_port_free_tmp; then
         ex=$?
         echo "Download failed. Are you connected to the Internet?"
         exit $ex
@@ -228,11 +229,11 @@ virtualenv --distribute --no-site-packages adhocracy_buildout
 ORIGINAL_PWD=$(pwd)
 cd adhocracy_buildout
 if [ -e adhocracy.buildout ]; then
-	hg pull --quiet -R adhocracy.buildout
+	(cd adhocracy.buildout && git pull --quiet)
 else
-	hg clone --quiet $BUILDOUT_URL adhocracy.buildout
+	git clone --quiet $BUILDOUT_URL adhocracy.buildout
 fi
-(cd adhocracy.buildout && hg up $branch > /dev/null)
+(cd adhocracy.buildout && git checkout $branch > /dev/null)
 
 for f in adhocracy.buildout/*; do ln -sf $f; done
 if echo $buildout_cfg_file | grep "^/" -q; then
