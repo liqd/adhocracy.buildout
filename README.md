@@ -23,12 +23,12 @@ On debian or Ubuntu, you can simply execute the following in a terminal:
 
 The script will use sudo to install the required dependencies, and install, set up, and start the required database services.
 
-Add the `-p` option to use PostgreSQL or the `-m` option to use MySQL instead of the default sqlite.
+Add the `-p` option to use PostgreSQL or the `-m` option to use MySQL instead of the default sqlite. Add `-b hhu` to install with the preconfiguration for HHU Düsseldorf.
 
 Developer Instructions
 ----------------------
 
-adhocracy itself gets installed in `./adhocracy`. To use your own [fork](http://confluence.atlassian.com/display/BITBUCKET/Forking+a+bitbucket+Repository) instead of the regular("upstream") adhocracy, edit `./adhocracy/.hg/.hgrc` to say the following:
+adhocracy itself gets installed in `adhocracy_buildout/src/adhocracy`. To use your own [fork](http://confluence.atlassian.com/display/BITBUCKET/Forking+a+bitbucket+Repository) instead of the regular("upstream") adhocracy, edit `adhocracy_buildout/src/adhocracy/.hg/.hgrc` to say the following:
 
 
     [ui]
