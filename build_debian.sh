@@ -43,7 +43,7 @@ not_use_sudo_commands=false
 not_use_user_commands=false
 adhoc_user=$USER
 install_mysql_client=false
-branch=default
+branch=master
 
 if [ -n "$SUDO_USER" ]; then
 	adhoc_user=$SUDO_USER
