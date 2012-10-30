@@ -22,7 +22,7 @@ OPTIONS:
    -p      Install a postgresSQL server
    -m      Install a MySQL server
    -M      Install MySQL client libraries
-   -c file Use the given buildout config file   
+   -c file Use the given buildout config file
    -A      Do not start now
    -S      Do not configure system services
    -s      Install only non-superuser parts
@@ -111,7 +111,10 @@ if ! $not_use_sudo_commands; then
 	$SUDO_CMD apt-get install -yqq openssh-client
 
 	if $use_postgres; then
-		$SUDO_CMD apt-get install -yqq postgresql-8.4 postgresql-server-dev-8.4 postgresql-8.4-postgis
+		$SUDO_CMD apt-get install -yqq postgresql postgresql-server-dev-all
+		if $install_geo; then
+			$SUDO_CMD apt-get install -yqq postgis
+		fi
 	fi
 	if $install_mysql_client; then
         $SUDO_CMD apt-get install -yqq libmysqlclient-dev
@@ -138,7 +141,7 @@ if ! $not_use_sudo_commands; then
 				psql -d adhocracy -f /usr/share/postgresql/8.4/contrib/postgis_comments.sql >/dev/null 2>&1;'
 		fi
 	fi
-	
+
 	# This is only executed when sudo-commands are enabled since mysql will only
 	# install with sudo-commands.
 	if $use_mysql; then
