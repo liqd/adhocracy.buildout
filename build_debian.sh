@@ -29,6 +29,7 @@ OPTIONS:
    -u      Install only superuser parts
    -U	   Set the username adhocracy should run as
    -b      Branch to check out
+   -G      Install geo extensions
 EOF
 }
 
@@ -63,6 +64,7 @@ do
     U)	  adhoc_user=$OPTARG;;
     c)    buildout_cfg_file=$OPTARG;;
     b)    branch=$OPTARG;;
+    G)    install_geo=true;;
     ?)    usage
           exit 2;;
     esac
@@ -111,7 +113,10 @@ if ! $not_use_sudo_commands; then
 	$SUDO_CMD apt-get install -yqq openssh-client
 
 	if $use_postgres; then
-		$SUDO_CMD apt-get install -yqq postgresql-8.4 postgresql-server-dev-8.4 postgresql-8.4-postgis
+		$SUDO_CMD apt-get install -yqq postgresql-8.4 postgresql-server-dev-8.4
+		if $install_geo; then
+			$SUDO_CMD apt-get install -yqq postgresql-8.4-postgis
+		fi
 	fi
 	if $install_mysql_client; then
         $SUDO_CMD apt-get install -yqq libmysqlclient-dev
