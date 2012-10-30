@@ -29,7 +29,6 @@ OPTIONS:
    -u      Install only superuser parts
    -U	   Set the username adhocracy should run as
    -b      Branch to check out
-   -G      Install geo extensions
 EOF
 }
 
@@ -64,7 +63,6 @@ do
     U)	  adhoc_user=$OPTARG;;
     c)    buildout_cfg_file=$OPTARG;;
     b)    branch=$OPTARG;;
-    G)    install_geo=true;;
     ?)    usage
           exit 2;;
     esac
