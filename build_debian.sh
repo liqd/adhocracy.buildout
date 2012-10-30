@@ -113,9 +113,9 @@ if ! $not_use_sudo_commands; then
 	$SUDO_CMD apt-get install -yqq openssh-client
 
 	if $use_postgres; then
-		$SUDO_CMD apt-get install -yqq postgresql-8.4 postgresql-server-dev-8.4
+		$SUDO_CMD apt-get install -yqq postgresql postgresql-server-dev-all
 		if $install_geo; then
-			$SUDO_CMD apt-get install -yqq postgresql-8.4-postgis
+			$SUDO_CMD apt-get install -yqq postgis
 		fi
 	fi
 	if $install_mysql_client; then
