@@ -247,6 +247,8 @@ fi
 
 . bin/activate
 
+pip install -U distribute >/dev/null
+
 # TODO write buildout file with configurations (sysv_init:user ...) and use that
 
 bin/python bootstrap.py -c ${buildout_cfg_file}
