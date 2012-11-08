@@ -52,8 +52,9 @@ beaker.session.secret = ${parts.adhocracy.secret}
 # dot at the beginning of each domain to create wildcard cookies. 
 # Also make sure this is identical to the adhocracy.domains setting
 # below. 
-beaker.session.cookie_domain = .${parts.domains.main} 
-session.domain =  .${parts.domains.main} 
+# Should be commented out if relative_urls is used
+#beaker.session.cookie_domain = .${parts.domains.main} 
+#session.domain =  .${parts.domains.main} 
 
 # If you'd like to fine-tune the individual locations of the cache data dirs
 # for the Cache data, or the Session saves, un-comment the desired settings
