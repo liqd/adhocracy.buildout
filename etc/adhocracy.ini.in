@@ -190,6 +190,11 @@ adhocracy.cache_tiles = True
 # INSTALL: Add an HTTP header that identifies the server we're running on
 #adhocracy.include_machine_name_in_header = True
 
+# INSTALL: Feedback instance settings.
+adhocracy.use_feedback_instance = true
+adhocracy.feedback_instance_key = feedback
+adhocracy.feedback_instance_label = Feedback
+
 # Statistics via Piwik
 piwik.site = 
 piwik.id = 
