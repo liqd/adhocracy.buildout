@@ -2,7 +2,6 @@
 
 BUILDOUT_URL=https://github.com/liqd/adhocracy.buildout
 SERVICE_TEMPLATE=etc/init.d__adhocracy_services.sh.template
-SERVICE_TEMPLATE_URL=https://raw.github.com/liqd/adhocracy.buildout/master/$SERVICE_TEMPLATE
 TEST_PORT_FREE_URL=https://raw.github.com/liqd/adhocracy.buildout/master/etc/test-port-free.py
 SUPERVISOR_PORTS="5005 5006 5010"
 ADHOCRACY_PORT=5001
@@ -176,12 +175,7 @@ if ! $not_use_sudo_commands; then
 			exit 35
 		fi
 
-        if [ -r "adhocracy_buildout/adhocracy.buildout/${SERVICE_TEMPLATE}" ]; then
-            stmpl=$(cat "adhocracy_buildout/adhocracy.buildout/${SERVICE_TEMPLATE}")
-        else
-            stmpl=$(wget $SERVICE_TEMPLATE_URL -O- -nv)
-        fi
-		echo "$stmpl" | \
+		cat "adhocracy_buildout/adhocracy.buildout/${SERVICE_TEMPLATE}" | \
 			sed -e "s#%%USER%%#$adhoc_user#" -e "s#%%DIR%%#$(readlink -f .)/adhocracy_buildout#" | \
 			$SUDO_CMD tee /etc/init.d/adhocracy_services >/dev/null
 
