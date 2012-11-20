@@ -42,7 +42,7 @@ not_use_sudo_commands=false
 not_use_user_commands=false
 adhoc_user=$USER
 install_mysql_client=false
-branch=master
+branch=develop
 
 if [ -n "$SUDO_USER" ]; then
 	adhoc_user=$SUDO_USER
@@ -231,6 +231,8 @@ else
 	git clone --quiet $BUILDOUT_URL adhocracy.buildout
 fi
 (cd adhocracy.buildout && git checkout $branch > /dev/null)
+
+
 
 for f in adhocracy.buildout/*; do ln -sf $f; done
 if echo $buildout_cfg_file | grep "^/" -q; then
