@@ -2,7 +2,6 @@
 
 BUILDOUT_URL=https://github.com/liqd/adhocracy.buildout
 SERVICE_TEMPLATE=etc/init.d__adhocracy_services.sh.template
-SERVICE_TEMPLATE_URL=https://raw.github.com/liqd/adhocracy.buildout/master/$SERVICE_TEMPLATE
 TEST_PORT_FREE_URL=https://raw.github.com/liqd/adhocracy.buildout/master/etc/test-port-free.py
 SUPERVISOR_PORTS="5005 5006 5010"
 ADHOCRACY_PORT=5001
@@ -43,7 +42,7 @@ not_use_sudo_commands=false
 not_use_user_commands=false
 adhoc_user=$USER
 install_mysql_client=false
-branch=master
+branch=develop
 
 if [ -n "$SUDO_USER" ]; then
 	adhoc_user=$SUDO_USER
@@ -176,12 +175,7 @@ if ! $not_use_sudo_commands; then
 			exit 35
 		fi
 
-        if [ -r "adhocracy_buildout/adhocracy.buildout/${SERVICE_TEMPLATE}" ]; then
-            stmpl=$(cat "adhocracy_buildout/adhocracy.buildout/${SERVICE_TEMPLATE}")
-        else
-            stmpl=$(wget $SERVICE_TEMPLATE_URL -O- -nv)
-        fi
-		echo "$stmpl" | \
+		cat "adhocracy_buildout/adhocracy.buildout/${SERVICE_TEMPLATE}" | \
 			sed -e "s#%%USER%%#$adhoc_user#" -e "s#%%DIR%%#$(readlink -f .)/adhocracy_buildout#" | \
 			$SUDO_CMD tee /etc/init.d/adhocracy_services >/dev/null
 
@@ -237,6 +231,8 @@ else
 	git clone --quiet $BUILDOUT_URL adhocracy.buildout
 fi
 (cd adhocracy.buildout && git checkout $branch > /dev/null)
+
+
 
 for f in adhocracy.buildout/*; do ln -sf $f; done
 if echo $buildout_cfg_file | grep "^/" -q; then
