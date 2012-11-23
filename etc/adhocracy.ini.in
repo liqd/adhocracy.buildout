@@ -199,7 +199,12 @@ adhocracy.feedback_instance_label = Feedback
 piwik.site = 
 piwik.id = 
 
+
+# hide instance list in main navigation
 adhocracy.hide_instance_list_in_navigation = False
+
+# hide watchlist in main navigation and put it in user menu
+adhocracy.put_watchlist_in_user_menu = False
 
 # useful in settings where users can create instances
 adhocracy.show_instance_creators = False
