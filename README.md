@@ -58,6 +58,8 @@ Run buildout with:
 Additional steps in adhocracy geo branch
 ----------------------------------------
 
+Install the libgeos library with all development files.
+
 Make sure `adhocracy.buildout` and `src/adhocracy` are both checked out in geo
 branch.
 
