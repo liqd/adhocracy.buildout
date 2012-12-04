@@ -150,10 +150,6 @@ adhocracy.cache_tiles = True
 
 # adhocracy.instance = adhocracy
 
-# INSTALL: Use URLs like /i/meta/proposal/foo instead of
-#          http://meta.adhocracy.lan:5001/proposal/foo
-adhocracy.relative_urls = True
-
 # INSTALL: Add an HTTP header that identifies the server we're running on
 adhocracy.include_machine_name_in_header = True
 
