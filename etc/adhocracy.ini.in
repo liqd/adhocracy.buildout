@@ -168,6 +168,8 @@ adhocracy.feedback_instance_label = Feedback
 piwik.site = 
 piwik.id = 
 
+# Show all instances on the frontpage
+adhocracy.startpage.instances.list_length = -1
 
 # hide instance list in main navigation
 adhocracy.hide_instance_list_in_navigation = False
