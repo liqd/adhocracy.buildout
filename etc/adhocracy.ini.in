@@ -59,8 +59,8 @@ adhocracy.relative_urls = ${parts.adhocracy.relative_urls}
 # Also make sure this is identical to the adhocracy.domains setting
 # below. 
 # Should be commented out iff relative URLs are used.
-{% if parts.adhocracy.relative_url != 'True' %}beaker.session.cookie_domain = .${parts.domains.main}{% end %}
-{% if parts.adhocracy.relative_url != 'True' %}session.domain = .${parts.domains.main}{% end %}
+{% if parts.adhocracy.relative_urls != 'True' %}beaker.session.cookie_domain = .${parts.domains.main}{% end %}
+{% if parts.adhocracy.relative_urls != 'True' %}session.domain = .${parts.domains.main}{% end %}
 
 # If you'd like to fine-tune the individual locations of the cache data dirs
 # for the Cache data, or the Session saves, un-comment the desired settings
