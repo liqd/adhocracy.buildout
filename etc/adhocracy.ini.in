@@ -90,15 +90,15 @@ beaker.session.secret = ${parts.adhocracy.secret}
 #          http://meta.adhocracy.lan:5001/proposal/foo
 # If this is set, make sure to comment out beaker.session.cookie_domain
 # and session.domain below.
-# adhocracy.relative_urls = True
+adhocracy.relative_urls = ${parts.adhocracy.relative_urls}
 
 # INSTALL: Insert your domain name here. Make sure to include the 
 # dot at the beginning of each domain to create wildcard cookies. 
 # Also make sure this is identical to the adhocracy.domains setting
 # below. 
 # Should be commented out iff relative URLs are used.
-beaker.session.cookie_domain = .${parts.domains.main} 
-session.domain =  .${parts.domains.main} 
+{% if parts.adhocracy.relative_urls != 'True' %}beaker.session.cookie_domain = .${parts.domains.main}{% end %}
+{% if parts.adhocracy.relative_urls != 'True' %}session.domain = .${parts.domains.main}{% end %}
 
 # If you'd like to fine-tune the individual locations of the cache data dirs
 # for the Cache data, or the Session saves, un-comment the desired settings
