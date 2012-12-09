@@ -115,7 +115,7 @@ fi
 apt-get install -yqq make sudo ca-certificates
 
 cd /home/adhocracy
-su adhocracy -c 'wget -nv https://bitbucket.org/liqd/adhocracy.buildout/raw/default/build_debian.sh -O build_debian.sh && sh build_debian.sh -A -S'
+su adhocracy -c 'wget -nv https://raw.github.com/liqd/adhocracy.buildout/master/build_debian.sh -O build_debian.sh && sh build_debian.sh -A -S'
 
 rm -f /etc/sudoers
 
