@@ -1,9 +1,10 @@
 #!/bin/sh
 
+DEFAULT_BRANCH=develop
 BUILDOUT_URL=https://github.com/liqd/adhocracy.buildout
 SERVICE_TEMPLATE=etc/init.d__adhocracy_services.sh.template
-SERVICE_TEMPLATE_URL=https://raw.github.com/liqd/adhocracy.buildout/master/$SERVICE_TEMPLATE
-TEST_PORT_FREE_URL=https://raw.github.com/liqd/adhocracy.buildout/master/etc/test-port-free.py
+SERVICE_TEMPLATE_URL=https://raw.github.com/liqd/adhocracy.buildout/$DEFAULT_BRANCH/$SERVICE_TEMPLATE
+CHECK_PORT_FREE_URL=https://raw.github.com/liqd/adhocracy.buildout/$DEFAULT_BRANCH/etc/check_port_free.py
 SUPERVISOR_PORTS="5005 5006 5010"
 ADHOCRACY_PORT=5001
 
@@ -43,7 +44,7 @@ not_use_sudo_commands=false
 not_use_user_commands=false
 adhoc_user=$USER
 install_mysql_client=false
-branch=develop
+branch=$DEFAULT_BRANCH
 
 if [ -n "$SUDO_USER" ]; then
 	adhoc_user=$SUDO_USER
@@ -216,16 +217,20 @@ if [ -x adhocracy_buildout/bin/supervisorctl ]; then
 	adhocracy_buildout/bin/supervisorctl shutdown >/dev/null || true
 fi
 
-test_port_free_tmp=$(mktemp)
-if [ '!' -e ./test-port-free.py ]; then
-	if ! wget -q $TEST_PORT_FREE_URL -O $test_port_free_tmp; then
+check_port_free=adhocracy/check_port_free.py
+if [ '!' -e "$check_port_free" ]; then
+    check_port_free_tmp=$(mktemp)
+    check_port_free=$check_port_free_tmp
+	if ! wget -q "$CHECK_PORT_FREE_URL" -O "$check_port_free_tmp"; then
         ex=$?
         echo "Download failed. Are you connected to the Internet?"
         exit $ex
     fi
 fi
-python $test_port_free_tmp -g 10 --kill-pid $ADHOCRACY_PORT $SUPERVISOR_PORTS
-rm -f $test_port_free_tmp
+python $check_port_free -g 10 --kill-pid $ADHOCRACY_PORT $SUPERVISOR_PORTS
+if [ -n "$check_port_free_tmp" ]; then
+    rm -f $check_port_free_tmp
+fi
 
 
 virtualenv --distribute --no-site-packages adhocracy_buildout
@@ -267,7 +272,7 @@ if $autostart; then
 	bin/supervisord
 	echo "Use adhocracy_buildout/bin/supervisorctl to control running services."
 
-	python adhocracy.buildout/etc/test-port-free.py -o -g 10 ${SUPERVISOR_PORTS}
+	python adhocracy.buildout/etc/check_port_free.py -o -g 10 ${SUPERVISOR_PORTS}
 	if bin/supervisorctl status | grep -vq RUNNING; then
 		echo 'Failed to start all services:'
 		bin/supervisorctl status
