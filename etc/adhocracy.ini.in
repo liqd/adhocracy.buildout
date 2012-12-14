@@ -139,7 +139,7 @@ adhocracy.twitter.profile_url = ${parts.twitter.profile_url}
 # unable to process messages related to another database. 
 adhocracy.amqp.host = 127.0.0.1
 #rabbitq default port is 5672
-adhocracy.amqp.port = ${parts.ports.rabbitmq} 
+adhocracy.amqp.port = ${parts.ports.rabbitmq}
 #adhocracy.amqp.event_queue = adhocracy.queue
 adhocracy.amqp.event_exchange = adhocracy.exchange
 
@@ -190,7 +190,7 @@ adhocracy.number_instance_overview_milestones = 3
 adhocracy.show_instance_overview_proposals = False
 
 # hide categories in facet navigation if no proposal is assigned to it
-adhocracy.hide_empty_categories_in_facet_list = False
+adhocracy.hide_empty_categories_in_facet_list = True
 
 
 # Logging configuration
