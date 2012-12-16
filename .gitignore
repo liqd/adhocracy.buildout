@@ -29,3 +29,4 @@ etc/sysv-init
 etc/adhocracy-interactive.ini
 mailsink
 adhocracy-test-chroot
+*.kate-swp
