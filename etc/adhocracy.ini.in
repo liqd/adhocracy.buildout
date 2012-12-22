@@ -20,14 +20,29 @@ port = ${parts.ports.main}
 {% if parts.adhocracy.debug != 'True' %}use_threadpool = True {% end %}
 threadpool_workers = 20
 
+
+
+{% if parts.adhocracy.themed == 'False' %}
+###################not themed adhocracy ###################
+
+[composite:main]
+use = egg:Paste#urlmap
+/ = default
+
+[pipeline:default]
+pipeline = content
+ 
+{% end %}
+
+{% if parts.adhocracy.themed == 'True' %}
+###################diazo theme adhocracy ###################
+
 [composite:main]
 use = egg:Paste#urlmap
 /static_theme = static
 /_wordpress = wordpress_pipe
 / = default
-
-###################diazo theme adhocracy ###################
-
+ 
 # Serve the theme from disk from /static (as set up in [composite:main])
 [app:static]
 use = egg:Paste#static
@@ -71,6 +86,8 @@ pipeline = theme
 use = egg:Paste#proxy
 address = http://${parts.domains.blog} 
 suppress_http_headers = accept-encoding
+
+{% end %}
 
 ###################Adhocracy conf ###################
 
