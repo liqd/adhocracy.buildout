@@ -9,7 +9,7 @@
 # Description:       Services required by the policy drafting platform adhocracy
 ### END INIT INFO
 
-USER="${sysv_conf:user}"
+USER="${user:adhocracy_user}"
 DIR="${buildout:directory}"
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 NAME=adhocracy-${domains:main}
