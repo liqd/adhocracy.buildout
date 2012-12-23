@@ -2,6 +2,10 @@
 # WARNING: Please make you changes in *.ini.in file and then run buildout to install it.
 #
 
+##############################################################
+# Generated adhocracy settings 
+############################################################## 
+ 
 [DEFAULT]
 {% if parts.adhocracy.debug == 'True' %}debug = True  {% end %}
 {% if parts.adhocracy.debug != 'True' %}debug = False {% end %}
@@ -295,3 +299,9 @@ formatter = generic
 [formatter_generic]
 format = %(asctime)s,%(msecs)03d %(levelname)-5.5s [%(name)s] %(message)s
 datefmt = %H:%M:%S
+
+##############################################################
+# Custom OVERRIDE adhocracy settings 
+############################################################## 
+
+${parts.adhocracy['settings_override']} 
