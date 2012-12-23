@@ -14,8 +14,12 @@ It sets up a bunch of servers and configures supervisor to run them:
 * rabbitmq (internal messaging queue)
 * supervisor
 
-Installation on debian or Ubuntu
---------------------------------
+
+Installation
+------------
+ 
+Automatic installation on debian or Ubuntu with build_debian.sh
+----------------------------------------------------------------
 
 On debian or Ubuntu, you can simply execute the following in a terminal:
 
@@ -25,7 +29,7 @@ The script will use sudo to install the required dependencies, and install, set 
 
 Add the `-p` option to use PostgreSQL or the `-m` option to use MySQL instead of the default sqlite. Add `-b develop` to install the development version, or `-b hhu` to install with the preconfiguration for HHU Düsseldorf.
 
-Developer Instructions
+Developer instructions
 ----------------------
 
 adhocracy itself gets installed in `adhocracy_buildout/src/adhocracy`. To use your own [fork](https://help.github.com/articles/fork-a-repo) instead of the regular("upstream") adhocracy, use [`git remote`](http://www.kernel.org/pub/software/scm/git/docs/git-remote.html):
@@ -38,22 +42,49 @@ adhocracy itself gets installed in `adhocracy_buildout/src/adhocracy`. To use yo
 
 You can now execute `git pull origin` to update your local copy with new upstream changes. Use [`commit`](http://www.kernel.org/pub/software/scm/git/docs/git-commit.html) and [`push`](http://www.kernel.org/pub/software/scm/git/docs/git-push.html) to record and publish your changes.  As soon as you are confident that you have implemented a feature or corrected a bug, create a [pull request](https://help.github.com/articles/using-pull-requests) to ask the core developers to incorporate your changes.
 
-Installation on non-debian systems
-----------------------------------
+Manual installation on other systems
+----------------------------------- 
 
-On other systems, you can install the dependencies and manually make a virtualenv:
+Install needed system packages (Debian example):
 
-    $ mkdir adhocracy_buildout 
-    $ virtualenv --distribute --no-site-packages adhocracy_buildout
+   $ sudo apt-get install libpng-dev libjpeg-dev gcc make build-essential bin86 unzip libpcre3-dev zlib1g-dev mercurial git
+   $ sudo apt-get install python python-virtualenv
+   $ sudo apt-get install libsqlite3-dev postgresql-server-dev-8.4
+   $ sudo apt-get install openjdk-6-jre 
+   $ sudo apt-get install erlang-dev erlang-mnesia erlang-os-mon xsltproc
+
+To make the apache vhost config work run:
+
+   $ sudo apt-get install libapache2-mod-proxy-html
+   $ sudo a2enmod proxy proxy_http proxy_html
+
+Checkout the adhocracy buildout:
+
+   $ git clone https://github.com/liqd/adhocracy.buildout adhocracy_buildout  
+ 
+Setup a python virtualenv:
+
     $ cd adhocracy_buildout 
+    $ virtualenv --distribute --no-site-packages .
     $ source bin/activate
 
+Run buildout:
 
-Run buildout with:
+    $ bin/python bootstrap.py 
+    $ bin/buildout
 
-    $ bin/python bootstrap.py -c buildout_development.cfg
-    $ bin/buildout -Nc buildout_development.cfg
+Start your database (and dependency servers):
 
+    $ bin/supervisord 
+
+Setup the adhocracy database:
+
+    $ bin/paster setup-app etc/adhocracy.ini --name=content
+
+Restart adhocracy and all dependency servers:
+
+    $ bin/supervisorctl reload 
+ 
 
 Additional steps in adhocracy geo branch
 ----------------------------------------
@@ -63,9 +94,8 @@ Install the libgeos library with all development files.
 Make sure `adhocracy.buildout` and `src/adhocracy` are both checked out in geo
 branch.
 
-After running the buildout, you now have to initialize the local postgres
-database cluster with PostGIS, as described in
-`src/adhocracy/docs/initialize-postgis.rst'.
+The buildout initializes the local postgres database cluster with PostGIS, 
+as described in`src/adhocracy/docs/initialize-postgis.rst'.
 
 In case you want to prefill the `region` table with Openstreetmap data, follow
 the docs in `src/adhocracy/docs/imposm-setup.txt`.
@@ -78,57 +108,33 @@ SpatiaLite has happened in the spatialite branch of `adhocracy.buildout`.
 Run adhocracy
 -------------
 
-    # (Re)Run paster setup-app to set up or update the database
-    # structure.
-    $ bin/paster setup-app etc/adhocracy.ini --name=content
-
-    # Start all dependency servers:
+Start adhocracy and  all dependency servers:
     $ bin/supervisord 
 
-    # View the status of all servers
+Restart servers:
+    $ bin/supervisorctl reload 
+
+View the status of all servers:
     $ bin/supervisorctl status
 
-    # To start/stop one server use
-    # $ bin/supervisorctl stop <name>
+To start/stop one server:
+    $ bin/supervisorctl stop <name>
 
-    Start the adhocracy server in foreground mode:
+Start the adhocracy server in foreground mode:
+    $ bin/supervisorctl stop adhocracy
     $ bin/paster serve etc/adhocracy.ini
 
 
 Buildout configuration
 ----------------------
 
-Edit `buildout_development.cfg` and/or `buildout_common.cfg` to change the
-domain, ports and server versions. You can overwrite settings from
-buildout_common.cfg in buildout_development.cfg. You can also use
-system packages, e.g. for solr or rabbitmq change the port settings in
-the buildout_*.cfg files and remove the sections form [buildout]
-"parts" and adjust the [supervisor] configurations, e.g.:
+Read  `buildout_commmon.cfg` and `buildout_development.cfg` to learn all 
+buildout configuration options. 
+Customize buildout.cfg to change the domains, ports and server versions.
+Instead of compiling all dependencies (postgres, solr,..) you can also use system packages.
+Just use your custom buildout file to remove the included files you do not need:
 
     [buildout]
-    
-    extends = buildout_common.cfg
-    parts += 
-        libevent
-        supervisor
-
-    ...
-    
-    [supervisor]
-    ...
-    programs =
-        40 adhocracy_background ${buildout:directory}/bin/paster [--plugin=adhocracy background -c ${buildout:directory}/etc/development.ini]
-
-If you want to install a certain version of adhocracy, edit 
-buildout_development.cfg and change 'branch' in the [adhocracy_code] 
-section to a branch name, a revision or a tag name, e.g.:
-
-    [adhocracy_code]
-    branch = release-1.2a2
-
-
-TODO
--------
-
-* example buildout
-
+    extends = buildout_development.cfg
+    extends -=  
+        buildouts/postgres.cfg 
