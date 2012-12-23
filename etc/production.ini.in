@@ -1,8 +1,0 @@
- 
-{% include etc/adhocracy.ini.in %}
-
-##############################################################
-#Custom OVERRIDES to install adhocracy on the productive server
-############################################################## 
-
-
