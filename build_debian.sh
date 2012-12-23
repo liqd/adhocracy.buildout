@@ -1,9 +1,9 @@
 #!/bin/sh
 
 BUILDOUT_URL=https://github.com/liqd/adhocracy.buildout
-SERVICE_TEMPLATE=etc/init.d__adhocracy_services.sh.template
+SERVICE_TEMPLATE=build_debian_scripts/init.d__adhocracy_services.sh.template
 SERVICE_TEMPLATE_URL=https://raw.github.com/liqd/adhocracy.buildout/master/$SERVICE_TEMPLATE
-TEST_PORT_FREE_URL=https://raw.github.com/liqd/adhocracy.buildout/master/etc/test-port-free.py
+TEST_PORT_FREE_URL=https://raw.github.com/liqd/adhocracy.buildout/master/build_debian_scripts/test-port-free.py
 SUPERVISOR_PORTS="5005 5006 5010"
 ADHOCRACY_PORT=5001
 
@@ -260,7 +260,7 @@ if [ -n "$tmp_file" ]; then
 	rm "$tmp_file"
 fi
 
-ln -sf adhocracy_buildout/adhocracy.buildout/etc/paster_interactive.sh "$ORIGINAL_PWD"
+ln -sf adhocracy_buildout/adhocracy.buildout/build_debian_scripts/paster_interactive.sh "$ORIGINAL_PWD"
 
 
 if $autostart; then
