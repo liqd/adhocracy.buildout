@@ -199,9 +199,21 @@ adhocracy.cache_tiles = True
 #adhocracy.include_machine_name_in_header = True
 
 # INSTALL: Feedback instance settings.
+# If feedback shall be used, users need to be member of the feedback instance.
+# This can be achieved with the `adhocracy.instances.autojoin` option below. If
+# the feedback instance is enabled later, existing users can be added to the
+# feedback instance with the following command:
+#
+# `bin/adhocpy src/adhocracy/scripts/add_all_users_to_instances.py etc/adhocracy.ini feedback`
+
 adhocracy.use_feedback_instance = true
 adhocracy.feedback_instance_key = feedback
 adhocracy.feedback_instance_label = Feedback
+
+# INSTALL: Instances which new users automatically join. This can be a comma
+# separated list of instances, or ALL. If feedback is enabled above, the
+# corresponding instance key or ALL should be part of this list.
+adhocracy.instances.autojoin = feedback
 
 # Statistics via Piwik
 piwik.site = 
