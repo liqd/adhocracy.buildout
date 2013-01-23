@@ -206,6 +206,10 @@ adhocracy.show_instance_overview_proposals = False
 adhocracy.hide_empty_categories_in_facet_list = True
 
 
+## Useful configuration options
+adhocracy.enable_gender = True
+
+
 # Logging configuration
 [loggers]
 keys = root, adhocracy, sqlalchemy
