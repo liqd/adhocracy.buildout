@@ -19,8 +19,6 @@ Install adhocracy on debian.
 
 OPTIONS:
    -h      Show this message
-   -p      Install a postgresSQL server
-   -m      Install a MySQL server
    -M      Install MySQL client libraries
    -c file Use the given buildout config file
    -A      Do not start now
@@ -32,14 +30,10 @@ OPTIONS:
 EOF
 }
 
-use_postgres=false
-use_mysql=false
-install_geo=false
 buildout_cfg_file=
 autostart=true
 setup_services=true
 not_use_sudo_commands=false
-not_use_user_commands=false
 adhoc_user=$USER
 install_mysql_client=false
 branch=$DEFAULT_BRANCH
@@ -51,8 +45,6 @@ fi
 while getopts DpMmASsuc:U:b: name
 do
     case $name in
-    p)    use_postgres=true;;
-    m)    use_mysql=true;;
     M)    install_mysql_client=true;;
     A)    autostart=false;;
     S)    setup_services=false;;
@@ -67,11 +59,6 @@ do
 done
 
 
-if $use_postgres && $use_mysql; then
-	echo 'Cannot use Postgres AND MySQL.'
-	exit 3
-fi
-
 if [ "${PWD#*/adhocracy_buildout}" != "$PWD" ]; then
 	echo "You should not run build_debian.sh from the adhocracy_buildout directory. Instead, run it from the directory which contains adhocracy_buildout."
 	exit 34
@@ -79,16 +66,7 @@ fi
 
 
 if [ -n "$buildout_cfg_file" ]; then
-	if $use_postgres || $use_mysql; then
-		echo "Buildout config file precludes the -p and -m option"
-		exit 33
-	fi
 	buildout_cfg_file=$(readlink -f "$buildout_cfg_file")
-elif $use_postgres; then
-	buildout_cfg_file=buildout_development_postgres.cfg
-elif $use_mysql; then
-	buildout_cfg_file=buildout_development_mysql.cfg
-	MYSQL_ROOTPW="sqlrootpw"
 else
 	buildout_cfg_file=buildout_development.cfg
 fi
@@ -104,50 +82,12 @@ if ! $not_use_sudo_commands; then
 		exit 20
 	fi
 
-	$SUDO_CMD apt-get install -yqq libpng-dev libjpeg-dev gcc make build-essential bin86 unzip libpcre3-dev zlib1g-dev git mercurial python python-virtualenv python-dev libsqlite3-dev openjdk-6-jre erlang-dev erlang-mnesia erlang-os-mon xsltproc libapache2-mod-proxy-html libpq-dev
+	$SUDO_CMD apt-get install -yqq libpng-dev libjpeg-dev gcc make build-essential bin86 unzip libpcre3-dev zlib1g-dev git mercurial python python-virtualenv python-dev libsqlite3-dev openjdk-6-jre erlang-dev erlang-mnesia erlang-os-mon xsltproc libpq-dev
 	# Not strictly required, but needed to push to github via ssh
 	$SUDO_CMD apt-get install -yqq openssh-client
 
-	if $use_postgres; then
-		$SUDO_CMD apt-get install -yqq postgresql postgresql-server-dev-all
-		if $install_geo; then
-			$SUDO_CMD apt-get install -yqq postgis
-		fi
-	fi
 	if $install_mysql_client; then
         $SUDO_CMD apt-get install -yqq libmysqlclient-dev
-	fi
-	if $use_mysql; then
-		echo "mysql mysql-server/root_password string ${MYSQL_ROOTPW}" | $SUDO_CMD debconf-set-selections
-		echo "mysql mysql-server/root_password_again string ${MYSQL_ROOTPW}" | $SUDO_CMD debconf-set-selections
-		$SUDO_CMD apt-get install -yqq mysql-server libmysqld-dev python-mysqldb
-		$SUDO_CMD sed -i "s%^bind-address.*%\#bind-address = 127.0.0.1\nskip-networking%" /etc/mysql/my.cnf
-		$SUDO_CMD /etc/init.d/mysql restart
-	fi
-	$SUDO_CMD a2enmod proxy proxy_http proxy_html >/dev/null
-
-	if $use_postgres; then
-		# Set up postgreSQL
-		# Since we're using postgreSQL 8.4 which doesn't have CREATE USER IF NOT EXISTS, we're using the following hack ...
-		echo "DROP ROLE IF EXISTS adhocracy; CREATE USER adhocracy PASSWORD 'adhoc';" | $SUDO_CMD su postgres -c 'psql'
-		$SUDO_CMD su postgres -c 'createdb adhocracy --owner adhocracy;' || true
-		if $install_geo; then
-			$SUDO_CMD su postgres -c '
-				createlang plpgsql adhocracy;
-				psql -d adhocracy -f /usr/share/postgresql/8.4/contrib/postgis-1.5/postgis.sql  >/dev/null 2>&1;
-				psql -d adhocracy -f /usr/share/postgresql/8.4/contrib/postgis-1.5/spatial_ref_sys.sql  >/dev/null 2>&1;
-				psql -d adhocracy -f /usr/share/postgresql/8.4/contrib/postgis_comments.sql >/dev/null 2>&1;'
-		fi
-	fi
-
-	# This is only executed when sudo-commands are enabled since mysql will only
-	# install with sudo-commands.
-	if $use_mysql; then
-	echo "CREATE DATABASE IF NOT EXISTS adhocracy; \
-              GRANT ALL PRIVILEGES ON adhocracy . * TO 'adhocracy'@'localhost' IDENTIFIED BY 'adhoc'; \
-              FLUSH PRIVILEGES;" \
-          | mysql --user root --password=${MYSQL_ROOTPW}
-
 	fi
 
 	if $setup_services; then
@@ -187,13 +127,12 @@ if ! mkdir -p adhocracy_buildout; then
 	exit 21
 fi
 
-# Directory buildout was not created
 if [ '!' -w adhocracy_buildout ]; then
 	echo 'Cannot write to adhocracy_buildout directory. Change to another directory, remove adhocracy_buildout, or run as another user'
 	exit 22
 fi
 if [ -x adhocracy_buildout/bin/supervisorctl ]; then
-	adhocracy_buildout/bin/supervisorctl shutdown >/dev/null || true
+	adhocracy_buildout/bin/supervisorctl shutdown >/dev/null 2>/dev/null || true
 fi
 
 check_port_free=adhocracy/check_port_free.py

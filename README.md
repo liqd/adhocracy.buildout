@@ -23,7 +23,7 @@ On debian or Ubuntu, you can simply execute the following in a terminal:
 
 The script will use sudo to install the required dependencies, and install, set up, and start the required database services.
 
-Add the `-p` option to use PostgreSQL or the `-m` option to use MySQL instead of the default sqlite. Add `-b develop` to install the development version, or `-b hhu` to install with the preconfiguration for HHU Düsseldorf.
+Add `-b develop` to install the development version, or `-b hhu` to install with the preconfiguration for HHU Düsseldorf.
 
 Developer Instructions
 ----------------------
