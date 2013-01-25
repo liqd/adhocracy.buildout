@@ -19,7 +19,6 @@ Install adhocracy on debian.
 
 OPTIONS:
    -h      Show this message
-   -D      Install a DNS server to answer *.adhocracy.lan
    -p      Install a postgresSQL server
    -m      Install a MySQL server
    -M      Install MySQL client libraries
@@ -37,7 +36,6 @@ use_postgres=false
 use_mysql=false
 install_geo=false
 buildout_cfg_file=
-modify_dns=false
 autostart=true
 setup_services=true
 not_use_sudo_commands=false
@@ -53,7 +51,6 @@ fi
 while getopts DpMmASsuc:U:b: name
 do
     case $name in
-    D)    modify_dns=true;;
     p)    use_postgres=true;;
     m)    use_mysql=true;;
     M)    install_mysql_client=true;;
@@ -151,24 +148,6 @@ if ! $not_use_sudo_commands; then
               FLUSH PRIVILEGES;" \
           | mysql --user root --password=${MYSQL_ROOTPW}
 
-	fi
-
-	# Set up DNS names
-	if $modify_dns; then
-		$SUDO_CMD apt-get install -qqy dnsmasq
-		/bin/echo -e 'address=/.adhocracy.lan/127.0.0.1\nresolv-file=/etc/dnsmasq.resolv.conf' | $SUDO_CMD tee /etc/dnsmasq.d/adhocracy.lan.conf >/dev/null
-		/bin/echo -e 'nameserver 8.8.8.8\nnameserver 8.8.4.4\n' | $SUDO_CMD tee /etc/dnsmasq.resolv.conf >/dev/null
-		$SUDO_CMD sed -i 's/^#IGNORE_RESOLVCONF=yes$/IGNORE_RESOLVCONF=yes/' /etc/default/dnsmasq >/dev/null
-		# This is hack-ish, but it works no matter how exotic the configuration is
-		if $SUDO_CMD test -w /etc/resolv.conf; then
-			echo 'nameserver 127.0.0.1' | $SUDO_CMD tee /etc/resolv.conf >/dev/null
-			$SUDO_CMD chattr +i /etc/resolv.conf
-		fi
-		$SUDO_CMD /etc/init.d/dnsmasq restart
-	else
-		if ! grep -q adhocracy.lan /etc/hosts; then
-			$SUDO_CMD sh -c 'echo 127.0.0.1 adhocracy.lan test.adhocracy.lan >> /etc/hosts'
-		fi
 	fi
 
 	if $setup_services; then
