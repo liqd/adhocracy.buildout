@@ -1,5 +1,4 @@
 #!/bin/sh
-# Please notice, that if you run this under Arch Linux, you should install wget before this.
 
 DEFAULT_BRANCH=develop
 BUILDOUT_URL=https://github.com/liqd/adhocracy.buildout
