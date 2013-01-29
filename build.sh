@@ -63,18 +63,17 @@ do
     esac
 done
 
-debian_install=false
-arch_install=false
+distro=''
 
 if which apt-get 2>/dev/null >/dev/null ; then
-	debian_install=true;PKG_INSTALL_CMD='apt-get install -yqq'
+	distro='debian';PYTHON_CMD='python';PIP_CMD='pip';PKG_INSTALL_CMD='apt-get install -yqq'
 fi
 
 if which pacman 2>/dev/null >/dev/null ; then
-	arch_install=true;alias python=python2;PKG_INSTALL_CMD='pacman -S --needed --noconfirm'
+	distro='arch';PYTHON_CMD='python2';PIP_CMD='pip2';PKG_INSTALL_CMD='pacman -S --needed --noconfirm'
 fi
 
-if ! $debian_install && ! $arch_install ; then
+if [ $distro == '' ] ; then
 	echo "Your OS is currently not supported! Aborting"; exit 1
 fi
 
@@ -101,27 +100,24 @@ if ! $not_use_sudo_commands; then
 		exit 20
 	fi
 	
-	if $debian_install true; then
-	# Please notice that the spaces before the ' are necessary to seperate the packages!
-	PKGS_TO_INSTALL=$PKGS_TO_INSTALL'libpng-dev libjpeg-dev gcc make build-essential bin86 unzip libpcre3-dev zlib1g-dev git mercurial python python-virtualenv python-dev libsqlite3-dev openjdk-6-jre erlang-dev erlang-mnesia erlang-os-mon xsltproc libpq-dev '
-	# Not strictly required, but needed to push to github via ssh
-	PKGS_TO_INSTALL=$PKGS_TO_INSTALL'openssh-client '
+	case $distro in
+		debian )
+	PKGS_TO_INSTALL=$PKGS_TO_INSTALL' libpng-dev libjpeg-dev gcc make build-essential bin86 unzip libpcre3-dev zlib1g-dev git mercurial python python-virtualenv python-dev libsqlite3-dev openjdk-6-jre erlang-dev erlang-mnesia erlang-os-mon xsltproc libpq-dev'
+	PKGS_TO_INSTALL=$PKGS_TO_INSTALL' openssh-client'
 
 	if $install_mysql_client; then
-        PKGS_TO_INSTALL=$PKGS_TO_INSTALL'libmysqlclient-dev '
+        PKGS_TO_INSTALL=$PKGS_TO_INSTALL' libmysqlclient-dev'
 	fi
-	fi
-	if $arch_install true; then
-	PKGS_TO_INSTALL=$PKGS_TO_INSTALL'wget libpng libjpeg gcc make base-devel bin86 unzip zlib git mercurial python2 python2-virtualenv python2-pip sqlite jre7-openjdk erlang libxslt postgresql-libs '
-        # Not strictly required, but needed to push to github via ssh
-        PKGS_TO_INSTALL=$PKGS_TO_INSTALL'openssh '
+	;;
+		arch )
+	PKGS_TO_INSTALL=$PKGS_TO_INSTALL' wget libpng libjpeg gcc make base-devel bin86 unzip zlib git mercurial python2 python2-virtualenv python2-pip sqlite jre7-openjdk erlang libxslt postgresql-libs'
+        PKGS_TO_INSTALL=$PKGS_TO_INSTALL' openssh'
 
         if $install_mysql_client; then
-        PKGS_TO_INSTALL=$PKGS_TO_INSTALL'libmysqlclient '
+        PKGS_TO_INSTALL=$PKGS_TO_INSTALL' libmysqlclient'
         fi
-
-	fi
-
+    ;;
+	esac
 	# Install all Packages
 	echo $PKGS_TO_INSTALL
 	$SUDO_CMD $PKG_INSTALL_CMD $PKGS_TO_INSTALL 2>/dev/null >/dev/null 1>/dev/null
@@ -140,19 +136,20 @@ if ! $not_use_sudo_commands; then
 		echo "$stmpl" | \
 			sed -e "s#%%USER%%#$adhoc_user#" -e "s#%%DIR%%#$(readlink -f .)/adhocracy_buildout#" | \
 				$SUDO_CMD tee $INIT_FILE >/dev/null
-		if $debian_install true; then
+		case $distro in 
+			debian )
 			SERVICE_CMD='update-rc.d'
 			SERVICE_CMD_PREFIX='defaults'
 			INIT_FILE='/etc/init.d/adhocracy_services'
-		fi
-		if $arch_install true; then
+			;;
+			arch )
 			SERVICE_CMD='systemctl enable'
 			INIT_FILE='/etc/rc.d/adhocracy_services'
-		fi
-
+			;;
+		esac
 		$SUDO_CMD chmod a+x $INIT_FILE
 		#TODO Write an service script for arch linux and install it
-		if ! $arch_install true; then
+		if [ ! $distro == 'arch' ] ; then
 		$SUDO_CMD $SERVICE_CMD adhocracy_services $SERVICE_CMD_PREFIX >/dev/null
 		fi
 	fi
@@ -193,7 +190,7 @@ if [ '!' -e "$check_port_free" ]; then
         exit $ex
     fi
 fi
-python $check_port_free -g 10 --kill-pid $ADHOCRACY_PORT $SUPERVISOR_PORTS
+$PYTHON_CMD $check_port_free -g 10 --kill-pid $ADHOCRACY_PORT $SUPERVISOR_PORTS
 if [ -n "$check_port_free_tmp" ]; then
     rm -f $check_port_free_tmp
 fi
@@ -220,20 +217,10 @@ fi
 
 . bin/activate
 
-if $debian_install true; then
-pip install -U distribute >/dev/null
-fi
-if $arch_install true; then
-pip2 install -U distribute
-fi
+$PIP_CMD install -U distribute >/dev/null
 
 # TODO write buildout file with configurations (sysv_init:user ...) and use that
-if $arch_install ; then
-python2 bootstrap.py -c ${buildout_cfg_file}
-fi
-if $debian_install ; then
-bin/python bootstrap.py -c ${buildout_cfg_file}
-fi
+$PYTHON_CMD bootstrap.py -c ${buildout_cfg_file}
 bin/buildout -Nc ${buildout_cfg_file}
 
 if [ -n "$tmp_file" ]; then
