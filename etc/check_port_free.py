@@ -111,7 +111,7 @@ def checkOnce(ports, opts_open=False, opts_kill='dont', opts_killSignal=signal.S
     errors = []
     messages = []
     for p in ports:
-        matchingDicts = filter(lambda d: d['port'] == p, nstat)
+        matchingDicts = list(filter(lambda d: d['port'] == p, nstat))
         if len(matchingDicts) == 0:
             if opts_open:
                 errors.append('Port %s not taken by any program' % p)
@@ -166,8 +166,8 @@ def main():
     parser.add_option('--grace-interval', dest='graceInterval', type='float', default=1, help='Check every n seconds', metavar='SECONDS')
     (opts, args) = parser.parse_args()
 
-    ports = map(int, args)
-    if len(ports) == 0:
+    ports = list(map(int, args))
+    if not ports:
         parser.error('Need at least one port to test')
     opts.killSignal = _signalByName(opts.killSignalStr)
     message_printer = lambda messages: print('\n'.join(messages))
