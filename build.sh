@@ -232,6 +232,9 @@ fi
 if $arch_install ; then
 python2 bootstrap.py -c ${buildout_cfg_file}
 fi
+if $debian_install ; then
+bin/python bootstrap.py -c ${buildout_cfg_file}
+fi
 bin/buildout -Nc ${buildout_cfg_file}
 
 if [ -n "$tmp_file" ]; then
