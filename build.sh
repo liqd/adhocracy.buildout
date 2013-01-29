@@ -18,15 +18,15 @@ usage: $0 [options]
 Install adhocracy on debian.
 
 OPTIONS:
-   -h       Show this message
-   -M       Install MySQL client libraries
-   -c file  Use the given buildout config file
-   -A       Do not start now
-   -S       Do not configure system services
-   -s       Install only non-superuser parts
-   -u       Install only superuser parts
-   -U	    Set the username adhocracy should run as
-   -b       Branch to check out
+   -h      Show this message
+   -M      Install MySQL client libraries
+   -c file Use the given buildout config file
+   -A      Do not start now
+   -S      Do not configure system services
+   -s      Install only non-superuser parts
+   -u      Install only superuser parts
+   -U      Set the username adhocracy should run as
+   -b      Branch to check out
 EOF
 }
 
