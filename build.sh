@@ -48,7 +48,7 @@ fi
 PKGS_TO_INSTALL=''
 PKG_INSTALL_CMD=''
 
-while getopts DpMmASsuac:U:b: name
+while getopts DpMmASsuc:U:b: name
 do
     case $name in
     M)    install_mysql_client=true;;
