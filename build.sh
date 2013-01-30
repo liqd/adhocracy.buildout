@@ -70,6 +70,7 @@ if which apt-get 2>/dev/null >/dev/null ; then
 	PYTHON_CMD='python'
 	PIP_CMD='pip'
 	PKG_INSTALL_CMD='apt-get install -yqq'
+	VIRTUALENV_CMD='virtualenv'
 fi
 
 if which pacman 2>/dev/null >/dev/null ; then
@@ -77,6 +78,7 @@ if which pacman 2>/dev/null >/dev/null ; then
 	PYTHON_CMD='python2'
 	PIP_CMD='pip2'
 	PKG_INSTALL_CMD='pacman -S --needed --noconfirm'
+	VIRTUALENV_CMD='virtualenv2'
 fi
 
 if [ -z "$distro" ] ; then
@@ -203,7 +205,7 @@ if [ -n "$check_port_free_tmp" ]; then
 fi
 
 
-virtualenv --distribute --no-site-packages adhocracy_buildout
+$VIRTUALENV_CMD --distribute --no-site-packages adhocracy_buildout
 ORIGINAL_PWD=$(pwd)
 cd adhocracy_buildout
 if [ -e adhocracy.buildout ]; then
