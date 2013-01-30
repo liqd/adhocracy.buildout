@@ -14,16 +14,16 @@ It sets up a bunch of servers and configures supervisor to run them:
 * rabbitmq (internal messaging queue)
 * supervisor
 
-Installation on debian or Ubuntu
---------------------------------
+Installation on debian, Ubuntu, or Arch
+---------------------------------------
 
-On debian or Ubuntu, you can simply execute the following in a terminal:
+On debian, Ubuntu, or Arch Linux you can simply execute the following in a terminal:
 
-    wget -nv https://raw.github.com/liqd/adhocracy.buildout/master/build_debian.sh -O build_debian.sh && sh build_debian.sh
+    wget -nv https://raw.github.com/liqd/adhocracy.buildout/develop/build.sh -O build.sh && sh build.sh
 
 The script will use sudo to install the required dependencies, and install, set up, and start the required database services.
 
-Add `-b develop` to install the development version, or `-b hhu` to install with the preconfiguration for HHU Düsseldorf.
+Add `-b master` to install the stable version, or `-b hhu` to install with the preconfiguration for HHU Düsseldorf.
 
 Developer Instructions
 ----------------------

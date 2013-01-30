@@ -115,18 +115,18 @@ fi
 apt-get install -yqq make sudo ca-certificates
 
 cd /home/adhocracy
-su adhocracy -c 'wget -nv https://raw.github.com/liqd/adhocracy.buildout/master/build_debian.sh -O build_debian.sh && sh build_debian.sh -A -S'
+su adhocracy -c 'wget -nv https://raw.github.com/liqd/adhocracy.buildout/develop/build.sh -O build.sh && sh build.sh -A -S'
 
 rm -f /etc/sudoers
 
-hgrev=\$(cd /home/adhocracy/adhocracy && hg id)
+rev=\$(cd /home/adhocracy/adhocracy && git rev-parse HEAD)
 
 if su adhocracy -c '/adhocracy-runtests.sh'; then
-	echo "(\$hgrev) TESTS PASSED, leaving chroot ..."
+	echo "(\$rev) TESTS PASSED, leaving chroot ..."
 	rescode=0
 else
 	rescode=\$?
-	echo "(\$hgrev) TESTS FAILED."
+	echo "(\$rev) TESTS FAILED."
 fi
 
 umount /proc
