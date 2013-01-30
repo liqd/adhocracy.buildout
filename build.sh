@@ -193,7 +193,7 @@ check_port_free=adhocracy/check_port_free.py
 if [ '!' -e "$check_port_free" ]; then
     check_port_free_tmp=$(mktemp)
     check_port_free=$check_port_free_tmp
-	if ! wget -q "$CHECK_PORT_FREE_URL" -O "$check_port_free_tmp"; then
+	if ! wget -nv "$CHECK_PORT_FREE_URL" -O "$check_port_free_tmp"; then
         ex=$?
         echo "Download failed. Are you connected to the Internet?"
         exit $ex
