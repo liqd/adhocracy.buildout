@@ -127,7 +127,7 @@ if ! $not_use_sudo_commands; then
 	esac
 	# Install all Packages
 	echo $PKG_INSTALL $PKGS_TO_INSTALL
-	$SUDO_CMD $PKG_INSTALL_CMD $PKGS_TO_INSTALL 2>/dev/null >/dev/null
+	$SUDO_CMD $PKG_INSTALL_CMD $PKGS_TO_INSTALL
 
 	if $setup_services; then
 		if [ "$adhoc_user" = "root" ]; then
