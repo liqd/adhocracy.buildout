@@ -66,15 +66,22 @@ done
 distro=''
 
 if which apt-get 2>/dev/null >/dev/null ; then
-	distro='debian';PYTHON_CMD='python';PIP_CMD='pip';PKG_INSTALL_CMD='apt-get install -yqq'
+	distro='debian'
+	PYTHON_CMD='python'
+	PIP_CMD='pip'
+	PKG_INSTALL_CMD='apt-get install -yqq'
 fi
 
 if which pacman 2>/dev/null >/dev/null ; then
-	distro='arch';PYTHON_CMD='python2';PIP_CMD='pip2';PKG_INSTALL_CMD='pacman -S --needed --noconfirm'
+	distro='arch'
+	PYTHON_CMD='python2'
+	PIP_CMD='pip2'
+	PKG_INSTALL_CMD='pacman -S --needed --noconfirm'
 fi
 
-if [ $distro == '' ] ; then
-	echo "Your OS is currently not supported! Aborting"; exit 1
+if [ "$distro" == '' ] ; then
+	echo "Your OS is currently not supported! Aborting"
+	exit 35
 fi
 
 if [ "${PWD#*/adhocracy_buildout}" != "$PWD" ]; then
