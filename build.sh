@@ -79,7 +79,7 @@ if which pacman 2>/dev/null >/dev/null ; then
 	PKG_INSTALL_CMD='pacman -S --needed --noconfirm'
 fi
 
-if [ "$distro" == '' ] ; then
+if [ -z "$distro" ] ; then
 	echo "Your OS is currently not supported! Aborting"
 	exit 35
 fi
