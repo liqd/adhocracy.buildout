@@ -126,7 +126,7 @@ if ! $not_use_sudo_commands; then
     ;;
 	esac
 	# Install all Packages
-	echo $PKGS_TO_INSTALL
+	echo $PKG_INSTALL $PKGS_TO_INSTALL
 	$SUDO_CMD $PKG_INSTALL_CMD $PKGS_TO_INSTALL 2>/dev/null >/dev/null 1>/dev/null
 
 	if $setup_services; then
