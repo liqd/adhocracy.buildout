@@ -138,7 +138,7 @@ if ! $not_use_sudo_commands; then
         if [ -r "adhocracy_buildout/adhocracy.buildout/${SERVICE_TEMPLATE}" ]; then
             stmpl=$(cat "adhocracy_buildout/adhocracy.buildout/${SERVICE_TEMPLATE}")
         else
-            stmpl=$(wget $SERVICE_TEMPLATE_URL -O- -nv >/dev/null 2>/dev/null)
+            stmpl=$(wget $SERVICE_TEMPLATE_URL -O- -nv)
         fi
 		case $distro in 
 			debian )
