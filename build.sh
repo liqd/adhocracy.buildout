@@ -140,9 +140,6 @@ if ! $not_use_sudo_commands; then
         else
             stmpl=$(wget $SERVICE_TEMPLATE_URL -O- -nv >/dev/null 2>/dev/null)
         fi
-		echo "$stmpl" | \
-			sed -e "s#%%USER%%#$adhoc_user#" -e "s#%%DIR%%#$(readlink -f .)/adhocracy_buildout#" | \
-				$SUDO_CMD tee $INIT_FILE >/dev/null
 		case $distro in 
 			debian )
 			SERVICE_CMD='update-rc.d'
@@ -154,10 +151,13 @@ if ! $not_use_sudo_commands; then
 			INIT_FILE='/etc/rc.d/adhocracy_services'
 			;;
 		esac
-		$SUDO_CMD chmod a+x $INIT_FILE
+		echo "$stmpl" | \
+			sed -e "s#%%USER%%#$adhoc_user#" -e "s#%%DIR%%#$(readlink -f .)/adhocracy_buildout#" | \
+				$SUDO_CMD tee "$INIT_FILE" >/dev/null
+		$SUDO_CMD chmod a+x "$INIT_FILE"
 		#TODO Write an service script for arch linux and install it
-		if [ ! $distro == 'arch' ] ; then
-		$SUDO_CMD $SERVICE_CMD adhocracy_services $SERVICE_CMD_PREFIX >/dev/null
+		if [ "$distro" '!=' 'arch' ] ; then
+			$SUDO_CMD $SERVICE_CMD adhocracy_services $SERVICE_CMD_PREFIX
 		fi
 	fi
 fi
