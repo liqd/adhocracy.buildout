@@ -120,7 +120,7 @@ su adhocracy -c 'curl -sS https://raw.github.com/liqd/adhocracy.buildout/develop
 
 rm -f /etc/sudoers
 
-rev=\$(cd /home/adhocracy/adhocracy && git rev-parse HEAD)
+rev=\$(cd /home/adhocracy/adhocracy_buildout/src/adhocracy.adhocracy_theme/ && git rev-parse HEAD)
 
 if su adhocracy -c '/adhocracy-runtests.sh'; then
 	echo "(\$rev) TESTS PASSED, leaving chroot ..."
