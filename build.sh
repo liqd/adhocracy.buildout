@@ -10,8 +10,7 @@ ADHOCRACY_PORT=5001
 
 set -e
 
-usage()
-{
+usage() {
 cat << EOF
 usage: $0 [options]
 
@@ -65,21 +64,23 @@ done
 
 distro=''
 
-if which apt-get 2>/dev/null >/dev/null ; then
+if which apt-get >/dev/null ; then
 	distro='debian'
 	PYTHON_CMD='python'
 	PIP_CMD='pip'
 	PKG_INSTALL_CMD='apt-get install -yqq'
+	VIRTUALENV_CMD='virtualenv'
 fi
 
-if which pacman 2>/dev/null >/dev/null ; then
+if which pacman >/dev/null ; then
 	distro='arch'
 	PYTHON_CMD='python2'
 	PIP_CMD='pip2'
 	PKG_INSTALL_CMD='pacman -S --needed --noconfirm'
+	VIRTUALENV_CMD='virtualenv2'
 fi
 
-if [ "$distro" == '' ] ; then
+if [ -z "$distro" ] ; then
 	echo "Your OS is currently not supported! Aborting"
 	exit 35
 fi
@@ -88,14 +89,6 @@ if [ "${PWD#*/adhocracy_buildout}" != "$PWD" ]; then
 	echo "You should not run build.sh from the adhocracy_buildout directory. Instead, run it from the directory which contains adhocracy_buildout."
 	exit 34
 fi
-
-
-if [ -n "$buildout_cfg_file" ]; then
-	buildout_cfg_file=$(readlink -f "$buildout_cfg_file")
-else
-	buildout_cfg_file=buildout_development.cfg
-fi
-
 
 if ! $not_use_sudo_commands; then
 	SUDO_CMD=sudo
@@ -106,7 +99,47 @@ if ! $not_use_sudo_commands; then
 		echo 'sudo failed. Is it installed and configured?'
 		exit 20
 	fi
-	
+fi
+
+# Prefer curl because wget < 1.14 fails on https://raw.github.com/ because 
+# it doesn't support x509v3 alternative names.
+downloader_program=curl
+if which curl > /dev/null ; then
+	if ! $not_use_sudo_commands ; then
+		$SUDO_CMD $PKG_INSTALL_CMD curl
+	else
+		wget_version=$(wget --version | head -n 1 | sed 's#[^0-9]*\([0-9][0-9.]*\).*#\1#' || true)
+		if test "$wget_version" = "1.12"; then
+			echo "WARNING: Old version of wget detected. Downloads from raw.github.com will fail. Install curl!"
+		fi
+		downloader_program=wget
+	fi
+fi
+
+# Usage: download URL filename
+download() {
+case "$downloader_program" in
+	curl )
+		curl -sS "$1" -o "$2"
+		;;
+	wget )
+		wget -nv "$1" -O "$2"
+		;;
+	*)
+		echo "Invalid downloader"
+		exit 1
+		;;
+esac
+}
+
+if [ -n "$buildout_cfg_file" ]; then
+	buildout_cfg_file=$(readlink -f "$buildout_cfg_file")
+else
+	buildout_cfg_file=buildout_development.cfg
+fi
+
+
+if ! $not_use_sudo_commands; then
 	case $distro in
 		debian )
 	PKGS_TO_INSTALL=$PKGS_TO_INSTALL' libpng-dev libjpeg-dev gcc make build-essential bin86 unzip libpcre3-dev zlib1g-dev git mercurial python python-virtualenv python-dev libsqlite3-dev openjdk-6-jre erlang-dev erlang-mnesia erlang-os-mon xsltproc libpq-dev'
@@ -117,7 +150,7 @@ if ! $not_use_sudo_commands; then
 	fi
 	;;
 		arch )
-	PKGS_TO_INSTALL=$PKGS_TO_INSTALL' wget libpng libjpeg gcc make base-devel bin86 unzip zlib git mercurial python2 python2-virtualenv python2-pip sqlite jre7-openjdk erlang libxslt postgresql-libs'
+	PKGS_TO_INSTALL=$PKGS_TO_INSTALL' libpng libjpeg gcc make base-devel bin86 unzip zlib git mercurial python2 python2-virtualenv python2-pip sqlite jre7-openjdk erlang libxslt postgresql-libs'
         PKGS_TO_INSTALL=$PKGS_TO_INSTALL' openssh'
 
         if $install_mysql_client; then
@@ -126,8 +159,8 @@ if ! $not_use_sudo_commands; then
     ;;
 	esac
 	# Install all Packages
-	echo $PKGS_TO_INSTALL
-	$SUDO_CMD $PKG_INSTALL_CMD $PKGS_TO_INSTALL 2>/dev/null >/dev/null 1>/dev/null
+	echo $PKG_INSTALL $PKGS_TO_INSTALL
+	$SUDO_CMD $PKG_INSTALL_CMD $PKGS_TO_INSTALL
 
 	if $setup_services; then
 		if [ "$adhoc_user" = "root" ]; then
@@ -138,11 +171,8 @@ if ! $not_use_sudo_commands; then
         if [ -r "adhocracy_buildout/adhocracy.buildout/${SERVICE_TEMPLATE}" ]; then
             stmpl=$(cat "adhocracy_buildout/adhocracy.buildout/${SERVICE_TEMPLATE}")
         else
-            stmpl=$(wget $SERVICE_TEMPLATE_URL -O- -nv >/dev/null 2>/dev/null)
+            stmpl=$(download $SERVICE_TEMPLATE_URL -)
         fi
-		echo "$stmpl" | \
-			sed -e "s#%%USER%%#$adhoc_user#" -e "s#%%DIR%%#$(readlink -f .)/adhocracy_buildout#" | \
-				$SUDO_CMD tee $INIT_FILE >/dev/null
 		case $distro in 
 			debian )
 			SERVICE_CMD='update-rc.d'
@@ -154,10 +184,13 @@ if ! $not_use_sudo_commands; then
 			INIT_FILE='/etc/rc.d/adhocracy_services'
 			;;
 		esac
-		$SUDO_CMD chmod a+x $INIT_FILE
+		echo "$stmpl" | \
+			sed -e "s#%%USER%%#$adhoc_user#" -e "s#%%DIR%%#$(readlink -f .)/adhocracy_buildout#" | \
+				$SUDO_CMD tee "$INIT_FILE" >/dev/null
+		$SUDO_CMD chmod a+x "$INIT_FILE"
 		#TODO Write an service script for arch linux and install it
-		if [ ! $distro == 'arch' ] ; then
-		$SUDO_CMD $SERVICE_CMD adhocracy_services $SERVICE_CMD_PREFIX >/dev/null
+		if [ "$distro" '!=' 'arch' ] ; then
+			$SUDO_CMD $SERVICE_CMD adhocracy_services $SERVICE_CMD_PREFIX
 		fi
 	fi
 fi
@@ -191,7 +224,7 @@ check_port_free=adhocracy/check_port_free.py
 if [ '!' -e "$check_port_free" ]; then
     check_port_free_tmp=$(mktemp)
     check_port_free=$check_port_free_tmp
-	if ! wget -q "$CHECK_PORT_FREE_URL" -O "$check_port_free_tmp"; then
+	if ! download "$CHECK_PORT_FREE_URL" "$check_port_free_tmp"; then
         ex=$?
         echo "Download failed. Are you connected to the Internet?"
         exit $ex
@@ -203,10 +236,10 @@ if [ -n "$check_port_free_tmp" ]; then
 fi
 
 
-virtualenv --distribute --no-site-packages adhocracy_buildout
+$VIRTUALENV_CMD --distribute --no-site-packages adhocracy_buildout
 ORIGINAL_PWD=$(pwd)
 cd adhocracy_buildout
-if [ -e adhocracy.buildout ]; then
+if [ -e adhocracy.buildout/.git ]; then
 	(cd adhocracy.buildout && git pull --quiet)
 else
 	git clone --quiet $BUILDOUT_URL adhocracy.buildout
