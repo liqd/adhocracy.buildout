@@ -10,8 +10,7 @@ ADHOCRACY_PORT=5001
 
 set -e
 
-usage()
-{
+usage() {
 cat << EOF
 usage: $0 [options]
 
@@ -65,7 +64,7 @@ done
 
 distro=''
 
-if which apt-get 2>/dev/null >/dev/null ; then
+if which apt-get >/dev/null ; then
 	distro='debian'
 	PYTHON_CMD='python'
 	PIP_CMD='pip'
@@ -73,7 +72,7 @@ if which apt-get 2>/dev/null >/dev/null ; then
 	VIRTUALENV_CMD='virtualenv'
 fi
 
-if which pacman 2>/dev/null >/dev/null ; then
+if which pacman >/dev/null ; then
 	distro='arch'
 	PYTHON_CMD='python2'
 	PIP_CMD='pip2'
@@ -91,14 +90,6 @@ if [ "${PWD#*/adhocracy_buildout}" != "$PWD" ]; then
 	exit 34
 fi
 
-
-if [ -n "$buildout_cfg_file" ]; then
-	buildout_cfg_file=$(readlink -f "$buildout_cfg_file")
-else
-	buildout_cfg_file=buildout_development.cfg
-fi
-
-
 if ! $not_use_sudo_commands; then
 	SUDO_CMD=sudo
 	if [ "$(id -u)" -eq 0 ]; then
@@ -108,7 +99,47 @@ if ! $not_use_sudo_commands; then
 		echo 'sudo failed. Is it installed and configured?'
 		exit 20
 	fi
-	
+fi
+
+# Prefer curl because wget < 1.14 fails on https://raw.github.com/ because 
+# it doesn't support x509v3 alternative names.
+downloader_program=curl
+if which curl > /dev/null ; then
+	if ! $not_use_sudo_commands ; then
+		$SUDO_CMD $PKG_INSTALL_CMD curl
+	else
+		wget_version=$(wget --version | head -n 1 | sed 's#[^0-9]*\([0-9][0-9.]*\).*#\1#' || true)
+		if test "$wget_version" = "1.12"; then
+			echo "WARNING: Old version of wget detected. Downloads from raw.github.com will fail. Install curl!"
+		fi
+		downloader_program=wget
+	fi
+fi
+
+# Usage: download URL filename
+download() {
+case "$downloader_program" in
+	curl )
+		curl -sS "$1" -o "$2"
+		;;
+	wget )
+		wget -nv "$1" -O "$2"
+		;;
+	*)
+		echo "Invalid downloader"
+		exit 1
+		;;
+esac
+}
+
+if [ -n "$buildout_cfg_file" ]; then
+	buildout_cfg_file=$(readlink -f "$buildout_cfg_file")
+else
+	buildout_cfg_file=buildout_development.cfg
+fi
+
+
+if ! $not_use_sudo_commands; then
 	case $distro in
 		debian )
 	PKGS_TO_INSTALL=$PKGS_TO_INSTALL' libpng-dev libjpeg-dev gcc make build-essential bin86 unzip libpcre3-dev zlib1g-dev git mercurial python python-virtualenv python-dev libsqlite3-dev openjdk-6-jre erlang-dev erlang-mnesia erlang-os-mon xsltproc libpq-dev'
@@ -119,7 +150,7 @@ if ! $not_use_sudo_commands; then
 	fi
 	;;
 		arch )
-	PKGS_TO_INSTALL=$PKGS_TO_INSTALL' wget libpng libjpeg gcc make base-devel bin86 unzip zlib git mercurial python2 python2-virtualenv python2-pip sqlite jre7-openjdk erlang libxslt postgresql-libs'
+	PKGS_TO_INSTALL=$PKGS_TO_INSTALL' libpng libjpeg gcc make base-devel bin86 unzip zlib git mercurial python2 python2-virtualenv python2-pip sqlite jre7-openjdk erlang libxslt postgresql-libs'
         PKGS_TO_INSTALL=$PKGS_TO_INSTALL' openssh'
 
         if $install_mysql_client; then
@@ -140,7 +171,7 @@ if ! $not_use_sudo_commands; then
         if [ -r "adhocracy_buildout/adhocracy.buildout/${SERVICE_TEMPLATE}" ]; then
             stmpl=$(cat "adhocracy_buildout/adhocracy.buildout/${SERVICE_TEMPLATE}")
         else
-            stmpl=$(wget $SERVICE_TEMPLATE_URL -O- -nv)
+            stmpl=$(download $SERVICE_TEMPLATE_URL -)
         fi
 		case $distro in 
 			debian )
@@ -193,7 +224,7 @@ check_port_free=adhocracy/check_port_free.py
 if [ '!' -e "$check_port_free" ]; then
     check_port_free_tmp=$(mktemp)
     check_port_free=$check_port_free_tmp
-	if ! wget -nv "$CHECK_PORT_FREE_URL" -O "$check_port_free_tmp"; then
+	if ! download "$CHECK_PORT_FREE_URL" "$check_port_free_tmp"; then
         ex=$?
         echo "Download failed. Are you connected to the Internet?"
         exit $ex
