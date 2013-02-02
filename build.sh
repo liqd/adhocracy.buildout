@@ -107,15 +107,15 @@ if which curl > /dev/null ; then
 	downloader_program=curl
 else
 	if ! $not_use_sudo_commands ; then
+		$SUDO_CMD $PKG_INSTALL_CMD curl
+		downloader_program=curl
+	else
 		# Fall back to wget
 		wget_version=$(wget --version | head -n 1 | sed 's#[^0-9]*\([0-9][0-9.]*\).*#\1#' || true)
 		if test "$wget_version" = "1.12"; then
 			echo "WARNING: Old version of wget detected. Downloads from raw.github.com will fail. Install curl!"
 		fi
 		downloader_program=wget
-	else
-		$SUDO_CMD $PKG_INSTALL_CMD curl
-		downloader_program=curl
 	fi
 fi
 
