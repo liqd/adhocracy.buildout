@@ -22,17 +22,55 @@ threadpool_workers = 20
 
 [composite:main]
 use = egg:Paste#urlmap
+/static_theme = static
+/_wordpress = wordpress_pipe
 / = default
 
-################### HHU: Disable diazo theming ###################
+###################diazo theme adhocracy ###################
 
 # Serve the theme from disk from /static (as set up in [composite:main])
 [app:static]
 use = egg:Paste#static
+document_root =  ${parts.adhocracy_code.diazo_theme_rules_dir}
 
 # Serve the Diazo-transformed content everywhere else
 [pipeline:default]
-pipeline = content
+pipeline = theme
+           content
+
+#[filter:wsgirewrite]
+#use = egg:WSGIRewrite
+#rulesets = testurls
+
+#[wsgirewrite:testurls]
+#rule1 = ^/test$ /index
+
+# Reference the rules file and the prefix applied to relative links
+# (e.g. the stylesheet). We turn on debug mode so that the theme is
+# re-built on each request, making it easy to experiment.
+
+[filter:theme]
+use = egg:diazo
+read_network = True
+rules = ${parts.adhocracy_code.diazo_theme_rules_dir}/rules.xml
+prefix = /static_theme
+doctype = <!DOCTYPE html>
+{% if parts.adhocracy.debug == 'True' %}debug = true  {% end %}
+{% if parts.adhocracy.debug != 'True' %}debug = false {% end %}
+wordpress_backend = ${parts.domains.blog} 
+wordpress_backend_startseite = ${parts.domains.blog}/startseite/
+
+###################diazo theme wordpress ###################
+
+[pipeline:wordpress_pipe]
+pipeline = theme
+           _wordpress
+ 
+# Proxy wordpress 
+[app:_wordpress]
+use = egg:Paste#proxy
+address = http://${parts.domains.blog} 
+suppress_http_headers = accept-encoding
 
 ###################Adhocracy conf ###################
 
@@ -108,7 +146,7 @@ adhocracy.language = ${parts.adhocracy.language}
 # INSTALL: The site directory contains your site modifications of Adhocracy 
 # (e.g. logos, CSS, html pages). A skeleton site directory will be created 
 # by the "setup-app" paster command. 
-adhocracy.site.dir = ${parts.buildout.directory}/src/adhocracy.hhu_theme/
+adhocracy.site.dir = ${parts.buildout.directory}/var/site
 
 # INSTALL: A nice E-Mail address. 
 adhocracy.email.from = ${parts.adhocracy['email.from']}
@@ -158,7 +196,7 @@ adhocracy.cache_tiles = True
 # adhocracy.instance = adhocracy
 
 # INSTALL: Add an HTTP header that identifies the server we're running on
-adhocracy.include_machine_name_in_header = True
+#adhocracy.include_machine_name_in_header = True
 
 # INSTALL: Feedback instance settings.
 # If feedback shall be used, users need to be member of the feedback instance.
@@ -181,8 +219,6 @@ adhocracy.instances.autojoin = feedback
 piwik.site = 
 piwik.id = 
 
-# Show all instances on the frontpage
-adhocracy.startpage.instances.list_length = -1
 
 # hide instance list in main navigation
 adhocracy.hide_instance_list_in_navigation = False
@@ -204,10 +240,6 @@ adhocracy.show_instance_overview_proposals = False
 
 # hide categories in facet navigation if no proposal is assigned to it
 adhocracy.hide_empty_categories_in_facet_list = True
-
-
-## Useful configuration options
-adhocracy.enable_gender = True
 
 
 # Logging configuration
