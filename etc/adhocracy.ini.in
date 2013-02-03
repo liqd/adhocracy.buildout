@@ -177,6 +177,10 @@ adhocracy.feedback_instance_label = Feedback
 # corresponding instance key or ALL should be part of this list.
 adhocracy.instances.autojoin = feedback
 
+# INSTALL: Read client IP addresses from X-Forwarded-For header.
+adhocracy.behind_proxy = ${parts.adhocracy.behind_proxy}
+
+
 # Statistics via Piwik
 piwik.site = 
 piwik.id = 
