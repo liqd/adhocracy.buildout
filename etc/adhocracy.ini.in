@@ -215,6 +215,16 @@ adhocracy.feedback_instance_label = Feedback
 # corresponding instance key or ALL should be part of this list.
 adhocracy.instances.autojoin = feedback
 
+# INSTALL: Read client IP addresses from X-Forwarded-For header.
+adhocracy.behind_proxy = ${parts.adhocracy.behind_proxy}
+
+# INSTALL: Store statistic information about requests in the database
+#adhocracy.requestlog_active = True
+# ... but don't log IP addresses ('dontlog', default)
+# ... but set the last 8 / 80 bits to zero ('anonymize')
+# -.. but log the full IP address ('none')
+#adhocracy.requestlog_ipanonymization = anonymize
+
 # Statistics via Piwik
 piwik.site = 
 piwik.id = 
