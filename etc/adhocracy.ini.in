@@ -229,6 +229,12 @@ adhocracy.behind_proxy = ${parts.adhocracy.behind_proxy}
 piwik.site = 
 piwik.id = 
 
+# INSTALL: Allow select users to include HTML
+# If this option is set to false, we only allow markdown input.
+# If it is set, we make a best effort to filter unsafe HTML, but allow iframes
+# and other complex constructs.
+#adhocracy.allow_user_html = false
+
 
 # hide instance list in main navigation
 adhocracy.hide_instance_list_in_navigation = False
