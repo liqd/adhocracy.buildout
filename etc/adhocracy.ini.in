@@ -191,6 +191,12 @@ adhocracy.requestlog_ipanonymization = none
 piwik.site = 
 piwik.id = 
 
+# INSTALL: Allow select users to include HTML
+# If this option is set to false, we only allow markdown input.
+# If it is set, we make a best effort to filter unsafe HTML, but allow iframes
+# and other complex constructs.
+#adhocracy.allow_user_html = false
+
 # Show all instances on the frontpage
 adhocracy.startpage.instances.list_length = -1
 
