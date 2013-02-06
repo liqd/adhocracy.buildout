@@ -185,7 +185,7 @@ if ! $not_use_sudo_commands; then
 			arch )
 			SERVICE_CMD='systemctl enable'
 			INIT_FILE='/etc/rc.d/adhocracy_services'
-			$SUDO_CMD cat >/etc/systemd/system/adhocracy_services.service << EOF
+			echo "
 [Unit]
 Description=Adhocracy Daemon
 
@@ -195,7 +195,7 @@ ExecStop=/etc/rc.d/adhocracy_services stop
 
 [Install]
 WantedBy=multi-user.target
-EOF
+" | sudo tee /etc/systemd/system/adhocracy_services.service
 			;;
 		esac
 		echo "$stmpl" | \
