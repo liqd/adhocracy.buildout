@@ -50,7 +50,7 @@ else
 			echo "."
 		elif [ $1 -eq 255 ] ; then
 			echo "(warning)."
-		elif
+		else
 			echo "failed!"
 		fi
 		return $1

@@ -195,7 +195,7 @@ ExecStop=/etc/rc.d/adhocracy_services stop
 
 [Install]
 WantedBy=multi-user.target
-" | sudo tee /etc/systemd/system/adhocracy_services.service
+" | sudo tee >/dev/null /etc/systemd/system/adhocracy_services.service
 			;;
 		esac
 		echo "$stmpl" | \
