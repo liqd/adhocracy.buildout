@@ -185,6 +185,19 @@ if ! $not_use_sudo_commands; then
 			arch )
 			SERVICE_CMD='systemctl enable'
 			INIT_FILE='/etc/rc.d/adhocracy_services'
+			echo "
+[Unit]
+Description=Adhocracy Daemon
+
+[Service]
+Type=forking
+ExecStart=/bin/sh /etc/rc.d/adhocracy_services start
+ExecStop=/bin/sh /etc/rc.d/adhocracy_services stop
+ExecStatus=/bin/sh /etc/rc.d/adhocracy_services status
+
+[Install]
+WantedBy=multi-user.target
+" | $SUDO_CMD tee >/dev/null /etc/systemd/system/adhocracy_services.service
 			;;
 		esac
 		echo "$stmpl" | \
@@ -192,9 +205,7 @@ if ! $not_use_sudo_commands; then
 				$SUDO_CMD tee "$INIT_FILE" >/dev/null
 		$SUDO_CMD chmod a+x "$INIT_FILE"
 		#TODO Write an service script for arch linux and install it
-		if [ "$distro" '!=' 'arch' ] ; then
-			$SUDO_CMD $SERVICE_CMD adhocracy_services $SERVICE_CMD_PREFIX
-		fi
+		$SUDO_CMD $SERVICE_CMD adhocracy_services $SERVICE_CMD_PREFIX
 	fi
 fi
 
