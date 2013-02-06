@@ -190,8 +190,9 @@ if ! $not_use_sudo_commands; then
 Description=Adhocracy Daemon
 
 [Service]
-ExecStart=/etc/rc.d/adhocracy_services start
-ExecStop=/etc/rc.d/adhocracy_services stop
+ExecStart=/bin/sh /etc/rc.d/adhocracy_services start
+ExecStop=/bin/sh /etc/rc.d/adhocracy_services stop
+ExecStatus=/bin/sh /etc/rc.d/adhocracy_services status
 
 [Install]
 WantedBy=multi-user.target
