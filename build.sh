@@ -190,6 +190,7 @@ if ! $not_use_sudo_commands; then
 Description=Adhocracy Daemon
 
 [Service]
+Type=forking
 ExecStart=/bin/sh /etc/rc.d/adhocracy_services start
 ExecStop=/bin/sh /etc/rc.d/adhocracy_services stop
 ExecStatus=/bin/sh /etc/rc.d/adhocracy_services status
