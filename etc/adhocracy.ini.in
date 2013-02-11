@@ -110,10 +110,10 @@ adhocracy.language = ${parts.adhocracy.language}
 # INSTALL: The site directory contains your site modifications of Adhocracy 
 # (e.g. logos, CSS, html pages). A skeleton site directory will be created 
 # by the "setup-app" paster command. 
-adhocracy.site.dir = ${parts.buildout.directory}/src/adhocracy.hhu_theme/
+adhocracy.site.dir = ${parts.buildout.directory}/src/adhocracy.hhu_theme/site_dir
 
 # INSTALL: Location of your custom client (overrides adhocracy defaults)
-# adhocracy.client_location = ${parts.buildout.directory}/src/adhocracy.YOUR_theme/
+adhocracy.client_location = ${parts.buildout.directory}/src/adhocracy.hhu_theme/
 
 # INSTALL: A nice E-Mail address. 
 adhocracy.email.from = ${parts.adhocracy['email.from']}
