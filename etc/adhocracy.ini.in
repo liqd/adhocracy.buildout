@@ -225,7 +225,7 @@ adhocracy.show_instance_overview_proposals = False
 adhocracy.hide_empty_categories_in_facet_list = True
 
 # Show global stats (user/proposal/comment count) on frontpage
-#adhocracy.stats_on_frontpage = true
+adhocracy.stats_on_frontpage = False
 
 
 ## Useful configuration options
