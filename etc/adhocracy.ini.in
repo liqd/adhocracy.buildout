@@ -112,6 +112,9 @@ adhocracy.language = ${parts.adhocracy.language}
 # by the "setup-app" paster command. 
 adhocracy.site.dir = ${parts.buildout.directory}/src/adhocracy.hhu_theme/
 
+# INSTALL: Location of your custom client (overrides adhocracy defaults)
+# adhocracy.client_location = ${parts.buildout.directory}/src/adhocracy.YOUR_theme/
+
 # INSTALL: A nice E-Mail address. 
 adhocracy.email.from = ${parts.adhocracy['email.from']}
 
