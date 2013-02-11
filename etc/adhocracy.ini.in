@@ -138,6 +138,8 @@ if parts['domains'].get('main.force_port', None):
 adhocracy.domain = ${adhocracy_domain}
 adhocracy.protocol = ${parts.adhocracy.protocol}
 
+{% if parts.adhocracy.protocol == 'https' %}beaker.session.secure = true {% end %}
+
 # INSTALL: Set a site name for all instances. This will be used as a part of 
 # the html <title>, notification E-Mails etc. 
 adhocracy.site.name = ${parts.adhocracy['site.name']}
