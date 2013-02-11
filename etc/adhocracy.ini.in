@@ -257,6 +257,9 @@ adhocracy.show_instance_overview_proposals = False
 # hide categories in facet navigation if no proposal is assigned to it
 adhocracy.hide_empty_categories_in_facet_list = True
 
+# Show global stats (user/proposal/comment count) on frontpage
+#adhocracy.stats_on_frontpage = true
+
 
 # Logging configuration
 [loggers]
