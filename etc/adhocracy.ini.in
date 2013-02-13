@@ -138,6 +138,8 @@ if parts['domains'].get('main.force_port', None):
 adhocracy.domain = ${adhocracy_domain}
 adhocracy.protocol = ${parts.adhocracy.protocol}
 
+{% if parts.adhocracy.protocol == 'https' %}beaker.session.secure = true {% end %}
+
 # INSTALL: Set a site name for all instances. This will be used as a part of 
 # the html <title>, notification E-Mails etc. 
 adhocracy.site.name = ${parts.adhocracy['site.name']}
@@ -147,6 +149,9 @@ adhocracy.language = ${parts.adhocracy.language}
 # (e.g. logos, CSS, html pages). A skeleton site directory will be created 
 # by the "setup-app" paster command. 
 adhocracy.site.dir = ${parts.buildout.directory}/var/site
+
+# INSTALL: Location of your custom client (overrides adhocracy defaults)
+# adhocracy.client_location = ${parts.buildout.directory}/src/adhocracy.YOUR_theme/
 
 # INSTALL: A nice E-Mail address. 
 adhocracy.email.from = ${parts.adhocracy['email.from']}
@@ -229,6 +234,12 @@ adhocracy.behind_proxy = ${parts.adhocracy.behind_proxy}
 piwik.site = 
 piwik.id = 
 
+# INSTALL: Allow select users to include HTML
+# If this option is set to false, we only allow markdown input.
+# If it is set, we make a best effort to filter unsafe HTML, but allow iframes
+# and other complex constructs.
+#adhocracy.allow_user_html = false
+
 
 # activate geo features
 adhocracy.proposal_geotags = True
@@ -257,6 +268,9 @@ adhocracy.show_instance_overview_proposals = False
 
 # hide categories in facet navigation if no proposal is assigned to it
 adhocracy.hide_empty_categories_in_facet_list = True
+
+# Show global stats (user/proposal/comment count) on frontpage
+#adhocracy.show_stats_on_frontpage = true
 
 
 # Logging configuration
