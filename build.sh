@@ -2,7 +2,7 @@
 
 DEFAULT_BRANCH=develop
 BUILDOUT_URL=https://github.com/liqd/adhocracy.buildout
-SERVICE_TEMPLATE=etc/init.d__adhocracy_services.sh.template
+SERVICE_TEMPLATE=etc/sysv-init.in
 SERVICE_TEMPLATE_URL=https://raw.github.com/liqd/adhocracy.buildout/$DEFAULT_BRANCH/$SERVICE_TEMPLATE
 CHECK_PORT_FREE_URL=https://raw.github.com/liqd/adhocracy.buildout/$DEFAULT_BRANCH/etc/check_port_free.py
 SUPERVISOR_PORTS="5005 5006 5010"
