@@ -33,19 +33,9 @@ if [ -r /lib/lsb/init-functions ] ; then
 	. /lib/lsb/init-functions	
 else
 	log_daemon_msg() {
-		if [ -z "${1:-}" ] ; then
-			return 1
-		fi
-		if [ -z "${2:-}"] ; then
-			echo "$1"
-			return
-		fi
 		echo -n "$1: $2"
 	}
 	log_end_msg() {
-		if [ -z "${1:-}"] ; then
-			return 1
-		fi
 		if [ $1 -eq 0 ] ; then
 			echo "."
 		elif [ $1 -eq 255 ] ; then
