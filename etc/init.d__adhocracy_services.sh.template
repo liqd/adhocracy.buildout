@@ -1,6 +1,6 @@
 #!/bin/sh
 ### BEGIN INIT INFO
-# Provides:          adhocracy_supervisord
+# Provides:          adhocracy-${domains:main}
 # Required-Start:    $local_fs $remote_fs
 # Required-Stop:     $local_fs $remote_fs
 # Default-Start:     2 3 4 5
@@ -9,11 +9,11 @@
 # Description:       Services required by the policy drafting platform adhocracy
 ### END INIT INFO
 
-USER="%%USER%%"
-DIR="%%DIR%%"
+USER="${sysv_conf:user}"
+DIR="${buildout:directory}"
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
-NAME=adhocracy_supervisor
-DESC="adhocracy services"
+NAME=adhocracy-${domains:main}
+DESC="Adhocracy supervisor for ${domains:main}"
 SCRIPTNAME=/etc/init.d/$NAME
 
 # Read configuration variable file if it is present

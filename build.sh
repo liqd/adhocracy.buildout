@@ -201,10 +201,11 @@ WantedBy=multi-user.target
 			;;
 		esac
 		echo "$stmpl" | \
-			sed -e "s#%%USER%%#$adhoc_user#" -e "s#%%DIR%%#$(readlink -f .)/adhocracy_buildout#" | \
+			sed -e "s#\${sysv_conf:user}#$adhoc_user#" \
+				-e "s#\${buildout:directory}#$(readlink -f .)/adhocracy_buildout#" \
+				-e "s#\${domains:main}#supervisord#" | \
 				$SUDO_CMD tee "$INIT_FILE" >/dev/null
 		$SUDO_CMD chmod a+x "$INIT_FILE"
-		#TODO Write an service script for arch linux and install it
 		$SUDO_CMD $SERVICE_CMD adhocracy_services $SERVICE_CMD_PREFIX
 	fi
 fi
