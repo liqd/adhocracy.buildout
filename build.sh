@@ -271,7 +271,10 @@ fi
 
 . bin/activate
 
-$PIP_CMD install -U distribute >/dev/null
+if ! $PIP_CMD install -U distribute >/dev/null; then
+	echo "Failed to install/update distribute! Is PyPi down?"
+	return 101
+fi
 
 # TODO write buildout file with configurations (sysv_init:user ...) and use that
 $PYTHON_CMD bootstrap.py -c ${buildout_cfg_file}
