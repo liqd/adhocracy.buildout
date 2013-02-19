@@ -285,8 +285,18 @@ if [ -n "$tmp_file" ]; then
 	rm "$tmp_file"
 fi
 
-ln -sf adhocracy_buildout/adhocracy.buildout/etc/paster_interactive.sh "$ORIGINAL_PWD"
+echo '#!/bin/sh
+set -e
+cd "$(dirname $(readlink -f $0))/../../"
+. bin/activate
 
+cp etc/adhocracy.ini etc/adhocracy-interactive.ini
+
+# Comment out the following line to restrict access to local only
+sed "s#host = .*#host = 0.0.0.0#" -i etc/adhocracy-interactive.ini
+exec bin/paster serve --reload etc/adhocracy-interactive.ini
+' > "${ORIGINAL_PWD}/paster_interactive.sh"
+chmod a+x "${ORIGINAL_PWD}/paster_interactive.sh"
 
 if $autostart; then
 	bin/supervisord
