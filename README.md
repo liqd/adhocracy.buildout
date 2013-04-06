@@ -1,3 +1,7 @@
+**IMPORTANT NOTE**: This repository isn't used anymore. The Adhocracy buildout is now
+found within the main Adhocracy repository: [htts://github.com/liqd/adhocracy](https://github.com/liqd/adhocracy).
+
+
 Adhocracy development buildout
 ==============================
 
